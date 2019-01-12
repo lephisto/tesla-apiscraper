@@ -23,7 +23,11 @@ sudo apt install python
 - Install InfluxDB as in https://docs.influxdata.com/influxdb/v1.7/introduction/installation/ and create a Database where you want to store your Data in:
 
 ```
-create database tesla
+user@horst:~$ influx
+Connected to http://localhost:8086 version 1.7.2
+InfluxDB shell version: 1.7.2
+Enter an InfluxQL query
+> create database tesla
 ```
 
 Additionally I suggest you to setup authentication or close the InfluxDB Port with a Packetfileter of your choice, if the Machine you use for Scraping has a Internetfacing Interface.
