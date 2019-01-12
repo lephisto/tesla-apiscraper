@@ -114,6 +114,7 @@ tmux new-session -s apiscraper 'python apiscraper.py'
 - Multithreaded statpulling
 - Code Cleanup (feel free to send PR :)
 - Move from influxql to it's successor flux, the upcoming query language for InfluxDB
+- Write some Tickscripts for alerting
 - Have a color gradient on geolocation that reflects any metric like speed for instance
 - Improve sleepinitiation
 
