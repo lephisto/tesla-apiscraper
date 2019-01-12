@@ -65,14 +65,6 @@ There you can change $rangeunit "km" to "mi" and $rangefactor 1.60934 to 1.0 and
 git clone https://github.com/lephisto/tesla-apiscraper
 ```
 
-- Get TeslaJSON Python Module
-
-```
-wget https://github.com/gglockner/teslajson/archive/master.zip
-unzip master.zip
-cp teslajson-master/teslajson.py .
-```
-
 - Get Python InfluxDB Module
 
 ```
