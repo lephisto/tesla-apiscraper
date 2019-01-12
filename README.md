@@ -32,7 +32,7 @@ Enter an InfluxQL query
 
 Additionally I suggest you to setup authentication or close the InfluxDB Port with a Packetfileter of your choice, if the Machine you use for Scraping has a Internetfacing Interface.
 
-- Install Grafana as in http://docs.grafana.org/installation/debian/ and import the Dashboard JSON Files included in this repository.
+- Install Grafana as in http://docs.grafana.org/installation/debian/
 
 - Get Grafana grafana-trackmap-panel
 
@@ -49,6 +49,13 @@ git checkout releases
 grafana-cli plugins install natel-discrete-panel
 ```
 
+- Import the Dashboard JSON Files included in this repository.
+
+**Note to the US-Users**: Since the API reports all Range Values in Miles, i included two dashboard variables to match your preferences. By default the Conversion to km / kph is done, to get rid of this go to the dashboard settings:
+
+![Driving Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/dashboardsetting_templatevar.png)
+
+There you can change $rangeunit "km" to "mi" and $rangefactor 1.60934 to 1.0 and you're good to go.
 
 ## Install API Scraper
 

@@ -7,6 +7,13 @@
       "type": "datasource",
       "pluginId": "influxdb",
       "pluginName": "InfluxDB"
+    },
+    {
+      "name": "VAR_RANGEUNIT",
+      "type": "constant",
+      "label": "rangeunit",
+      "value": "km",
+      "description": ""
     }
   ],
   "__requires": [
@@ -72,7 +79,7 @@
   "gnetId": null,
   "graphTooltip": 2,
   "id": null,
-  "iteration": 1547305986397,
+  "iteration": 1547309031744,
   "links": [],
   "panels": [
     {
@@ -157,7 +164,7 @@
               },
               {
                 "params": [
-                  "*1.60934 "
+                  "*$rangefactor"
                 ],
                 "type": "math"
               }
@@ -196,7 +203,7 @@
       ],
       "datasource": "${DS_TESLA}",
       "decimals": 2,
-      "format": "lengthkm",
+      "format": "none",
       "gauge": {
         "maxValue": 100,
         "minValue": 0,
@@ -227,7 +234,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "postfix": "",
+      "postfix": "$rangeunit",
       "postfixFontSize": "50%",
       "prefix": "Est.",
       "prefixFontSize": "50%",
@@ -269,7 +276,7 @@
               },
               {
                 "params": [
-                  "*1.60934 "
+                  "*$rangefactor"
                 ],
                 "type": "math"
               }
@@ -308,7 +315,7 @@
       ],
       "datasource": "${DS_TESLA}",
       "decimals": 2,
-      "format": "lengthkm",
+      "format": "none",
       "gauge": {
         "maxValue": 100,
         "minValue": 0,
@@ -339,7 +346,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "postfix": "",
+      "postfix": "$rangeunit",
       "postfixFontSize": "50%",
       "prefix": "Rated",
       "prefixFontSize": "50%",
@@ -379,7 +386,7 @@
               },
               {
                 "params": [
-                  "*1.60934 "
+                  "*$rangefactor"
                 ],
                 "type": "math"
               }
@@ -1845,6 +1852,8 @@
           "measurement": "charge_state",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT \"battery_heater_on\" FROM \"charge_state\" WHERE (\"metric\" = 'battery_heater_on') AND $timeFilter",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1862,6 +1871,12 @@
               "key": "metric",
               "operator": "=",
               "value": "battery_heater_on"
+            },
+            {
+              "condition": "AND",
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
             }
           ]
         }
@@ -1954,6 +1969,46 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+      },
+      {
+        "current": {
+          "value": "${VAR_RANGEUNIT}",
+          "text": "${VAR_RANGEUNIT}"
+        },
+        "hide": 2,
+        "label": null,
+        "name": "rangeunit",
+        "options": [
+          {
+            "value": "${VAR_RANGEUNIT}",
+            "text": "${VAR_RANGEUNIT}"
+          }
+        ],
+        "query": "${VAR_RANGEUNIT}",
+        "skipUrlSync": false,
+        "type": "constant"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "1.60934",
+          "value": "1.60934"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "rangefactor",
+        "options": [
+          {
+            "selected": true,
+            "text": "1.60934",
+            "value": "1.60934"
+          }
+        ],
+        "query": "1.60934",
+        "skipUrlSync": false,
+        "type": "custom"
       }
     ]
   },
@@ -1989,5 +2044,5 @@
   "timezone": "",
   "title": "Charging",
   "uid": "dNviSBUmk",
-  "version": 103
+  "version": 111
 }

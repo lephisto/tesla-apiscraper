@@ -7,6 +7,13 @@
       "type": "datasource",
       "pluginId": "influxdb",
       "pluginName": "InfluxDB"
+    },
+    {
+      "name": "VAR_RANGEUNIT",
+      "type": "constant",
+      "label": "rangeunit",
+      "value": "km",
+      "description": ""
     }
   ],
   "__requires": [
@@ -64,7 +71,7 @@
   "gnetId": null,
   "graphTooltip": 2,
   "id": null,
-  "iteration": 1547305451794,
+  "iteration": 1547309177313,
   "links": [],
   "panels": [
     {
@@ -108,7 +115,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "postfix": "km",
+      "postfix": "$rangeunit",
       "postfixFontSize": "30%",
       "prefix": "",
       "prefixFontSize": "50%",
@@ -132,8 +139,8 @@
           "measurement": "vehicle_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"odometer\") * 1.60934 FROM \"vehicle_state\" WHERE (\"metric\" = 'odometer') ",
-          "rawQuery": true,
+          "query": "SELECT last(\"odometer\") * $rangefactor FROM \"vehicle_state\" WHERE (\"metric\" = 'odometer') ",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -150,7 +157,7 @@
               },
               {
                 "params": [
-                  "* 1.60934"
+                  "*$rangefactor"
                 ],
                 "type": "math"
               }
@@ -330,7 +337,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "postfix": " km",
+      "postfix": "$rangeunit",
       "postfixFontSize": "30%",
       "prefix": "",
       "prefixFontSize": "50%",
@@ -366,7 +373,7 @@
               },
               {
                 "params": [
-                  "*1.60934"
+                  "*$rangefactor"
                 ],
                 "type": "math"
               }
@@ -774,7 +781,7 @@
         "#d44a3a"
       ],
       "datasource": "${DS_TESLA}",
-      "format": "velocitykmh",
+      "format": "none",
       "gauge": {
         "maxValue": 100,
         "minValue": 0,
@@ -805,7 +812,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "postfix": "",
+      "postfix": " $rangeunit/h",
       "postfixFontSize": "50%",
       "prefix": "",
       "prefixFontSize": "50%",
@@ -829,7 +836,7 @@
           "measurement": "drive_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"speed\") * 1.60934 FROM \"drive_state\" WHERE (\"metric\" = 'speed' AND \"display_name\" =~ /^$vehicle_name$/)",
+          "query": "SELECT last(\"speed\") * $rangefactor FROM \"drive_state\" WHERE (\"metric\" = 'speed' AND \"display_name\" =~ /^$vehicle_name$/)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -936,7 +943,7 @@
           "measurement": "drive_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"speed\") * 1.60934 FROM \"drive_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/ AND \"metric\" = 'speed') AND $timeFilter GROUP BY time(5s) fill(previous)",
+          "query": "SELECT mean(\"speed\") * $rangefactor FROM \"drive_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/ AND \"metric\" = 'speed') AND $timeFilter GROUP BY time(5s) fill(previous)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -995,8 +1002,8 @@
       },
       "yaxes": [
         {
-          "format": "velocitykmh",
-          "label": null,
+          "format": "none",
+          "label": "Speed",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -1642,6 +1649,12 @@
               "key": "metric",
               "operator": "=",
               "value": "battery_heater_on"
+            },
+            {
+              "condition": "AND",
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
             }
           ]
         }
@@ -1687,7 +1700,7 @@
         "value": "minutes"
       },
       "timeTextColor": "#d8d9da",
-      "title": "Battery Heater",
+      "title": "Panel Title",
       "type": "natel-discrete-panel",
       "units": "short",
       "useTimePrecision": false,
@@ -1743,11 +1756,51 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+      },
+      {
+        "current": {
+          "value": "${VAR_RANGEUNIT}",
+          "text": "${VAR_RANGEUNIT}"
+        },
+        "hide": 2,
+        "label": null,
+        "name": "rangeunit",
+        "options": [
+          {
+            "value": "${VAR_RANGEUNIT}",
+            "text": "${VAR_RANGEUNIT}"
+          }
+        ],
+        "query": "${VAR_RANGEUNIT}",
+        "skipUrlSync": false,
+        "type": "constant"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "1.60934",
+          "value": "1.60934"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "rangefactor",
+        "options": [
+          {
+            "selected": true,
+            "text": "1.60934",
+            "value": "1.60934"
+          }
+        ],
+        "query": "1.60934",
+        "skipUrlSync": false,
+        "type": "custom"
       }
     ]
   },
   "time": {
-    "from": "now-2d",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {
@@ -1778,5 +1831,5 @@
   "timezone": "",
   "title": "Driving",
   "uid": "Imf45f8iz",
-  "version": 108
+  "version": 118
 }
