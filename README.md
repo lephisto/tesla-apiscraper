@@ -5,6 +5,11 @@ Selfhosted API Scraper for pulling Vehicle Telemetry from the Tesla Owner API in
 
 This can be hosted on any System that's capable of running InfluxDB, Grafana and Python. In this short guide I assume you're using a Debian'ish OS. It can run on a dedicated Linuxserver out there on the Internets or on your home Raspberry Pi.
 
+## Features
+
+- Capable of handling multiple Vehicles in one Tesla Account
+- Extended Sleep support: Car will fall asleep after certain time of no charging and no driving. Monitoring will continue withing 60 Seconds on car usage.
+
 ## Screenshots
 
 ![Driving Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/driving_dash.png)
