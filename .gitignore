@@ -1,0 +1,5 @@
+# Exclude
+config.py
+teslajson-master/
+master.zip
+*.pyc
