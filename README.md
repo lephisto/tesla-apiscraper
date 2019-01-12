@@ -1,9 +1,15 @@
 # tesla-apiscraper
-Selfhosted API Scraper for pulling Vehicle Statistics from the Tesla Owner API into an InfluxDB + Grafana Dashboards.
+Selfhosted API Scraper for pulling Vehicle Statistics from the Tesla Owner API into an InfluxDB visualisation on Grafana Dashboards.
 
 **Putting an end to __handing out the Key__ for your 100+ Grand Car to a third party you don't know.**
 
 This can be hosted on any System that's capable of running InfluxDB, Grafana and Python. In this short Guide I assume you're using a Debian'ish Operating System.
+
+## Screenshots
+
+![Driving Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/driving_dash.png)
+
+![Charging Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/charging_dash.png)
 
 ## Installation:
 
