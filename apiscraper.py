@@ -1,7 +1,7 @@
 """ apiscraper.py - log all Tesla data available from the
     Mothership API to Influx.
 
-    Author: Bastian Mäuser (January 2019)
+    Author: Bastian Maeuser (January 2019)
     https://github.com/lephisto/tesla-apiscraper
 
     Please note that the use of the Tesla REST API in general
