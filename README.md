@@ -116,3 +116,8 @@ tmux new-session -s apiscraper 'python apiscraper.py'
 - Move from influxql to it's successor flux, the upcoming query language for InfluxDB
 - Have a color gradient on geolocation that reflects any metric like speed for instance
 - Improve sleepinitiation
+
+## Credits
+
+- Tesla API Interface forked from Greg Glockner https://github.com/gglockner/teslajson (removed pulling Tesla API Credentials from a pastebin)
+- Things stolen from basic Script from cko from the german tff-forum.de
