@@ -1,0 +1,16 @@
+# Telsa Credentials
+a_tesla_email = '<email>'               # myTesla Account Username
+a_tesla_passwd = '<password>'           # myTesla Account Password
+a_tesla_caridx = 0                      # Index of the Car in myTesla Account in case of multiple Cars
+a_allowsleep = 1                        # Allow Car to fall asleep / don't wake up if car is asleep on Scraper start
+a_maximumsleep = 1024                   # Wake up every X seconds, if car is asleep
+
+# Logging
+a_logfile = 'apiscraper.log'            # APIScraper Logfile
+
+# Influx DB Credentials
+a_influxhost = 'localhost'              #InfluxDB Host
+a_influxport = 8086                     #InfluxDB Port
+a_influxuser = 'tesla'                  #InfluxDB Username
+a_influxpass = '<influxdbpassword>'     #InfluxDB Password
+a_influxdb = 'tesla'                    #InfluxDB Datebasename

@@ -1,7 +1,7 @@
 # tesla-apiscraper
 Selfhosted API Scraper for pulling Vehicle Statistics from the Tesla Owner API into an InfluxDB + Grafana Dashboards.
 
-Putting an end to Handing out the Key for your 100+ Grand Car to a third party you don't know.
+**Putting an end to __handing out the Key__ for your 100+ Grand Car to a third party you don't know.**
 
 This can be hosted on any System that's capable of running InfluxDB, Grafana and Python. In this short Guide I assume you're using a Debian'ish Operating System.
 
@@ -84,6 +84,7 @@ tmux new-session -s apiscraper 'python apiscraper.py'
 ## Known Limitations and issues
 
 - If you narrow down Timefilter too much, and there are no Measurements, you won't see anything in the Graph and Discrete.
+- The Code is far from being clean and in some way spaghetti'ish. This will be cleaned up in future Versions.
 
 ## No
 
@@ -91,4 +92,9 @@ tmux new-session -s apiscraper 'python apiscraper.py'
 
 ## More Disclaimer
 
-Please note that the use of the Tesla REST API in general and the use of this software in particular is not endorsed by Tesla. You use this software at your own risk. The author does not take responsibility for anything related to the use of this software.
+- Please note that the use of the Tesla REST API in general and the use of this software in particular is not endorsed by Tesla. You use this software at your own risk. The author does not take responsibility for anything related to the use of this software.
+
+## To Do's
+
+- Multithreaded Stat pulling
+- Code Cleanup
