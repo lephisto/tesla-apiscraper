@@ -165,7 +165,10 @@ class StateMonitor(object):
                             interval = 1
             except (urllib2.HTTPError, urllib2.URLError) as exc:
                 logger.info("HTTP Error: " + str(exc))
-                return -1  # re-initialize.
+                if a_allowsleep == 1:
+                    return interval
+                else:
+                    return -1  # re-initialize.
         if any_change:  # there have been changes, reduce interval
             if interval > 1:
                 interval /= 2
