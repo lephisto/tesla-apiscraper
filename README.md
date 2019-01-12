@@ -119,5 +119,5 @@ tmux new-session -s apiscraper 'python apiscraper.py'
 
 ## Credits
 
-- Tesla API Interface forked from Greg Glockner https://github.com/gglockner/teslajson (removed pulling Tesla API Credentials from a pastebin)
+- Tesla API Interface forked from Greg Glockner https://github.com/gglockner/teslajson (removed pulling Tesla API Credentials from a pastebin whish seemed fishy..)
 - Things stolen from basic Script from cko from the german tff-forum.de

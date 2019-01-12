@@ -60,12 +60,8 @@ class Connection(object):
         self.proxy_url = proxy_url
         self.proxy_user = proxy_user
         self.proxy_password = proxy_password
-        # tesla_client = self.__open("/raw/0a8e0xTJ", baseurl="http://pastebin.com")
-        # current_client = tesla_client['v1']
         current_client = a_api
         self.baseurl = a_baseurl
-        #if not self.baseurl.startswith('https:') or not self.baseurl.endswith(('.teslamotors.com','.tesla.com')):
-        #    raise IOError("Unexpected URL (%s) from pastebin" % self.baseurl)
         self.api = a_api
         if access_token:
             self.__sethead(access_token)
