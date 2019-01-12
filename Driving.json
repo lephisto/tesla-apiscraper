@@ -36,6 +36,12 @@
     },
     {
       "type": "panel",
+      "id": "pr0ps-trackmap-panel",
+      "name": "TrackMap",
+      "version": "2.0.0"
+    },
+    {
+      "type": "panel",
       "id": "singlestat",
       "name": "Singlestat",
       "version": "5.0.0"
@@ -51,20 +57,6 @@
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
         "type": "dashboard"
-      },
-      {
-        "datasource": "${DS_TESLA}",
-        "enable": false,
-        "hide": false,
-        "iconColor": "rgba(255, 96, 96, 1)",
-        "limit": 100,
-        "name": "charging_state",
-        "query": "select charging_state as title,charging_state as description from charge_state where metric='charging_state' order by time asc",
-        "showIn": 0,
-        "tags": [],
-        "tagsColumn": "",
-        "textColumn": "",
-        "type": "tags"
       }
     ]
   },
@@ -72,7 +64,7 @@
   "gnetId": null,
   "graphTooltip": 2,
   "id": null,
-  "iteration": 1547294287451,
+  "iteration": 1547305451794,
   "links": [],
   "panels": [
     {
@@ -85,8 +77,7 @@
         "#d44a3a"
       ],
       "datasource": "${DS_TESLA}",
-      "decimals": 2,
-      "format": "lengthkm",
+      "format": "none",
       "gauge": {
         "maxValue": 100,
         "minValue": 0,
@@ -95,12 +86,123 @@
         "thresholdMarkers": true
       },
       "gridPos": {
-        "h": 2,
+        "h": 3,
         "w": 4,
         "x": 0,
         "y": 0
       },
-      "id": 20,
+      "id": 17,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "km",
+      "postfixFontSize": "30%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [],
+          "measurement": "vehicle_state",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"odometer\") * 1.60934 FROM \"vehicle_state\" WHERE (\"metric\" = 'odometer') ",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "odometer"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              },
+              {
+                "params": [
+                  "* 1.60934"
+                ],
+                "type": "math"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "metric",
+              "operator": "=",
+              "value": "odometer"
+            }
+          ]
+        }
+      ],
+      "thresholds": "",
+      "title": "Odometer",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "${DS_TESLA}",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 4,
+        "y": 0
+      },
+      "id": 13,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -119,7 +221,118 @@
       "nullText": null,
       "postfix": "",
       "postfixFontSize": "50%",
-      "prefix": "Ideal",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [],
+          "measurement": "drive_state",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"shift_state\") FROM \"drive_state\" WHERE (\"metric\" = 'shift_state' AND \"display_name\" =~ /^$vehicle_name$/) ",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "shift_state"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "metric",
+              "operator": "=",
+              "value": "shift_state"
+            },
+            {
+              "condition": "AND",
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": "",
+      "title": "Drivemode",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "${DS_TESLA}",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 6,
+        "y": 0
+      },
+      "id": 22,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": " km",
+      "postfixFontSize": "30%",
+      "prefix": "",
       "prefixFontSize": "50%",
       "rangeMaps": [
         {
@@ -147,17 +360,13 @@
             [
               {
                 "params": [
-                  "ideal_battery_range"
+                  "est_battery_range"
                 ],
                 "type": "field"
               },
               {
-                "params": [],
-                "type": "last"
-              },
-              {
                 "params": [
-                  "*1.60934 "
+                  "*1.60934"
                 ],
                 "type": "math"
               }
@@ -167,7 +376,13 @@
             {
               "key": "metric",
               "operator": "=",
-              "value": "ideal_battery_range"
+              "value": "est_battery_range"
+            },
+            {
+              "condition": "AND",
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
             }
           ]
         }
@@ -183,31 +398,154 @@
           "value": "null"
         }
       ],
-      "valueName": "avg"
+      "valueName": "current"
     },
     {
       "cacheTimeout": null,
       "colorBackground": false,
-      "colorValue": false,
+      "colorValue": true,
       "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
+        "#1f78c1",
+        "#508642",
+        "#ea6460"
       ],
       "datasource": "${DS_TESLA}",
-      "decimals": 2,
-      "format": "lengthkm",
+      "decimals": 1,
+      "format": "celsius",
       "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
+        "maxValue": 50,
+        "minValue": -15,
+        "show": true,
         "thresholdLabels": false,
         "thresholdMarkers": true
       },
       "gridPos": {
-        "h": 2,
-        "w": 4,
-        "x": 4,
+        "h": 3,
+        "w": 3,
+        "x": 8,
+        "y": 0
+      },
+      "id": 2,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": true
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "previous"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "climate_state",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "outside_temp"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "metric",
+              "operator": "=",
+              "value": "outside_temp"
+            },
+            {
+              "condition": "AND",
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": "0,35",
+      "title": "Outside Temperatur",
+      "type": "singlestat",
+      "valueFontSize": "50%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#1f78c1",
+        "#508642",
+        "#ea6460"
+      ],
+      "datasource": "${DS_TESLA}",
+      "decimals": 1,
+      "format": "celsius",
+      "gauge": {
+        "maxValue": 50,
+        "minValue": -15,
+        "show": true,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 11,
         "y": 0
       },
       "id": 18,
@@ -229,7 +567,7 @@
       "nullText": null,
       "postfix": "",
       "postfixFontSize": "50%",
-      "prefix": "Est.",
+      "prefix": "",
       "prefixFontSize": "50%",
       "rangeMaps": [
         {
@@ -242,16 +580,106 @@
         "fillColor": "rgba(31, 118, 189, 0.18)",
         "full": false,
         "lineColor": "rgb(31, 120, 193)",
-        "show": false
+        "show": true
       },
       "tableColumn": "",
       "targets": [
         {
-          "groupBy": [],
-          "measurement": "charge_state",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "previous"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "climate_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"est_battery_range\") FROM \"charge_state\" WHERE (\"metric\" = 'est_battery_range')  AND $timeFilter",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "inside_temp"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "metric",
+              "operator": "=",
+              "value": "inside_temp"
+            },
+            {
+              "condition": "AND",
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": "0,35",
+      "title": "Inside Temperatur",
+      "type": "singlestat",
+      "valueFontSize": "50%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "current"
+    },
+    {
+      "autoZoom": true,
+      "datasource": "${DS_TESLA}",
+      "gridPos": {
+        "h": 13,
+        "w": 10,
+        "x": 14,
+        "y": 0
+      },
+      "id": 15,
+      "lineColor": "red",
+      "links": [],
+      "maxDataPoints": 1000,
+      "pointColor": "royalblue",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "10s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "previous"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "drive_state",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"native_latitude\" AS \"latitude\", \"native_longitude\" AS \"longitude\" FROM \"drive_state\" WHERE (\"display_name\" = 'Ulysses') AND time >= now() - 6h",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
@@ -259,19 +687,13 @@
             [
               {
                 "params": [
-                  "est_battery_range"
+                  "native_latitude"
                 ],
                 "type": "field"
               },
               {
                 "params": [],
-                "type": "last"
-              },
-              {
-                "params": [
-                  "*1.60934 "
-                ],
-                "type": "math"
+                "type": "median"
               }
             ]
           ],
@@ -279,23 +701,68 @@
             {
               "key": "metric",
               "operator": "=",
-              "value": "est_battery_range"
+              "value": "native_latitude"
+            },
+            {
+              "condition": "AND",
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
+            }
+          ]
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "10s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "previous"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "drive_state",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "native_longitude"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "median"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "metric",
+              "operator": "=",
+              "value": "native_longitude"
+            },
+            {
+              "condition": "AND",
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
             }
           ]
         }
       ],
-      "thresholds": "",
-      "title": "Range",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
+      "title": "Geolocation",
+      "transparent": true,
+      "type": "pr0ps-trackmap-panel"
     },
     {
       "cacheTimeout": null,
@@ -307,440 +774,19 @@
         "#d44a3a"
       ],
       "datasource": "${DS_TESLA}",
-      "decimals": 2,
-      "format": "lengthkm",
+      "format": "velocitykmh",
       "gauge": {
         "maxValue": 100,
         "minValue": 0,
-        "show": false,
+        "show": true,
         "thresholdLabels": false,
         "thresholdMarkers": true
       },
       "gridPos": {
-        "h": 2,
+        "h": 5,
         "w": 4,
-        "x": 8,
-        "y": 0
-      },
-      "id": 19,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "Rated",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "groupBy": [],
-          "measurement": "charge_state",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "battery_range"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              },
-              {
-                "params": [
-                  "*1.60934 "
-                ],
-                "type": "math"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "metric",
-              "operator": "=",
-              "value": "battery_range"
-            }
-          ]
-        }
-      ],
-      "thresholds": "",
-      "title": "Range",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "datasource": "${DS_TESLA}",
-      "format": "kwatth",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 2,
-        "w": 3,
-        "x": 12,
-        "y": 0
-      },
-      "id": 32,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "groupBy": [],
-          "measurement": "charge_state",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "charge_energy_added"
-                ],
-                "type": "field"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "metric",
-              "operator": "=",
-              "value": "charge_energy_added"
-            }
-          ]
-        }
-      ],
-      "thresholds": "",
-      "title": "Energy added",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "datasource": "${DS_TESLA}",
-      "decimals": 2,
-      "format": "h",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 2,
-        "w": 3,
-        "x": 15,
-        "y": 0
-      },
-      "hideTimeOverride": false,
-      "id": 30,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "last",
-      "targets": [
-        {
-          "alias": "",
-          "groupBy": [],
-          "measurement": "charge_state",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "time_to_full_charge"
-                ],
-                "type": "field"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "metric",
-              "operator": "=",
-              "value": "time_to_full_charge"
-            },
-            {
-              "condition": "AND",
-              "key": "display_name",
-              "operator": "=~",
-              "value": "/^$vehicle_name$/"
-            }
-          ]
-        }
-      ],
-      "thresholds": "",
-      "title": "Time to Full at current Rate",
-      "transparent": false,
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [],
-      "valueName": "current"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "datasource": "${DS_TESLA}",
-      "format": "none",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 2,
-        "w": 3,
-        "x": 18,
-        "y": 0
-      },
-      "id": 4,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "groupBy": [],
-          "measurement": "charge_state",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "charger_phases"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "metric",
-              "operator": "=",
-              "value": "charger_phases"
-            },
-            {
-              "condition": "AND",
-              "key": "display_name",
-              "operator": "=~",
-              "value": "/^$vehicle_name$/"
-            }
-          ]
-        }
-      ],
-      "thresholds": "",
-      "title": "AC Charger Phases",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "datasource": "${DS_TESLA}",
-      "format": "amp",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 2,
-        "w": 3,
-        "x": 21,
-        "y": 0
+        "x": 0,
+        "y": 3
       },
       "id": 10,
       "interval": null,
@@ -780,22 +826,30 @@
       "targets": [
         {
           "groupBy": [],
-          "measurement": "charge_state",
+          "measurement": "drive_state",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT last(\"speed\") * 1.60934 FROM \"drive_state\" WHERE (\"metric\" = 'speed' AND \"display_name\" =~ /^$vehicle_name$/)",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "charger_actual_current"
+                  "speed"
                 ],
                 "type": "field"
               },
               {
                 "params": [],
                 "type": "last"
+              },
+              {
+                "params": [
+                  "* 1.60934"
+                ],
+                "type": "math"
               }
             ]
           ],
@@ -803,7 +857,7 @@
             {
               "key": "metric",
               "operator": "=",
-              "value": "charger_actual_current"
+              "value": "speed"
             },
             {
               "condition": "AND",
@@ -814,8 +868,8 @@
           ]
         }
       ],
-      "thresholds": "",
-      "title": "AC Charger Actual Current",
+      "thresholds": "10,80,150",
+      "title": "Vehicle Speed",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -828,118 +882,6 @@
       "valueName": "avg"
     },
     {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#e24d42",
-        "#508642",
-        "#e5ac0e"
-      ],
-      "datasource": "${DS_TESLA}",
-      "description": "Voltage supplied by Charger",
-      "format": "volt",
-      "gauge": {
-        "maxValue": 260,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 4,
-        "x": 0,
-        "y": 2
-      },
-      "id": 2,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "groupBy": [],
-          "measurement": "charge_state",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT last(\"charger_voltage\") FROM \"charge_state\" WHERE (\"metric\" = 'charger_voltage' AND \"display_name\" =~ /^$vehicle_name$/) ",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "charger_voltage"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "metric",
-              "operator": "=",
-              "value": "charger_voltage"
-            },
-            {
-              "condition": "AND",
-              "key": "display_name",
-              "operator": "=~",
-              "value": "/^$vehicle_name$/"
-            }
-          ]
-        }
-      ],
-      "thresholds": "196,240",
-      "title": "Charger Voltage",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "current"
-    },
-    {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
@@ -948,16 +890,14 @@
       "fill": 1,
       "gridPos": {
         "h": 5,
-        "w": 20,
+        "w": 10,
         "x": 4,
-        "y": 2
+        "y": 3
       },
-      "id": 12,
+      "id": 8,
       "legend": {
         "avg": false,
         "current": false,
-        "hideEmpty": false,
-        "hideZero": false,
         "max": false,
         "min": false,
         "show": true,
@@ -967,7 +907,7 @@
       "lines": true,
       "linewidth": 1,
       "links": [],
-      "nullPointMode": "null",
+      "nullPointMode": "connected",
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -978,7 +918,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "charger_voltage",
+          "alias": "speed",
           "groupBy": [
             {
               "params": [
@@ -993,36 +933,44 @@
               "type": "fill"
             }
           ],
-          "measurement": "charge_state",
+          "measurement": "drive_state",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT mean(\"speed\") * 1.60934 FROM \"drive_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/ AND \"metric\" = 'speed') AND $timeFilter GROUP BY time(5s) fill(previous)",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "charger_voltage"
+                  "speed"
                 ],
                 "type": "field"
               },
               {
                 "params": [],
                 "type": "mean"
+              },
+              {
+                "params": [
+                  "* 1.60934"
+                ],
+                "type": "math"
               }
             ]
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "charger_voltage"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
+            },
+            {
+              "condition": "AND",
+              "key": "metric",
+              "operator": "=",
+              "value": "speed"
             }
           ]
         }
@@ -1031,7 +979,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Charger Voltage",
+      "title": "Vehicle Speed",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1047,7 +995,7 @@
       },
       "yaxes": [
         {
-          "format": "volt",
+          "format": "velocitykmh",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -1071,304 +1019,16 @@
     {
       "cacheTimeout": null,
       "colorBackground": false,
-      "colorValue": true,
+      "colorValue": false,
       "colors": [
-        "#e24d42",
-        "#e5ac0e",
-        "#508642"
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
       ],
       "datasource": "${DS_TESLA}",
-      "description": "Current Battery Level",
-      "format": "percent",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": true,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 4,
-        "x": 0,
-        "y": 7
-      },
-      "id": 14,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
-      "targets": [
-        {
-          "groupBy": [],
-          "measurement": "charge_state",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "battery_level"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "metric",
-              "operator": "=",
-              "value": "battery_level"
-            },
-            {
-              "condition": "AND",
-              "key": "display_name",
-              "operator": "=~",
-              "value": "/^$vehicle_name$/"
-            }
-          ]
-        }
-      ],
-      "thresholds": "8,20",
-      "title": "Battery Level",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "avg"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "${DS_TESLA}",
-      "fill": 1,
-      "gridPos": {
-        "h": 5,
-        "w": 20,
-        "x": 4,
-        "y": 7
-      },
-      "id": 24,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "alias": "battery_level",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "previous"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "charge_state",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "battery_level"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "metric",
-              "operator": "=",
-              "value": "battery_level"
-            },
-            {
-              "condition": "AND",
-              "key": "display_name",
-              "operator": "=~",
-              "value": "/^$vehicle_name$/"
-            }
-          ]
-        },
-        {
-          "alias": "charge_limit_soc",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "previous"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "charge_state",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "charge_limit_soc"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "metric",
-              "operator": "=",
-              "value": "charge_limit_soc"
-            },
-            {
-              "condition": "AND",
-              "key": "display_name",
-              "operator": "=~",
-              "value": "/^$vehicle_name$/"
-            }
-          ]
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Battery Level",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": null,
-          "format": "percent",
-          "label": null,
-          "logBase": 1,
-          "max": "100",
-          "min": "0",
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#e24d42",
-        "#629e51",
-        "#3f6833"
-      ],
-      "datasource": "${DS_TESLA}",
-      "description": "Power supplied by Charger.",
       "format": "kwatt",
       "gauge": {
-        "maxValue": 120,
+        "maxValue": 300,
         "minValue": 0,
         "show": true,
         "thresholdLabels": false,
@@ -1378,9 +1038,9 @@
         "h": 5,
         "w": 4,
         "x": 0,
-        "y": 12
+        "y": 8
       },
-      "id": 8,
+      "id": 11,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -1418,16 +1078,18 @@
       "targets": [
         {
           "groupBy": [],
-          "measurement": "charge_state",
+          "measurement": "drive_state",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT last(\"power\") FROM \"drive_state\" WHERE (\"metric\" = 'power' AND \"display_name\" =~ /^$vehicle_name$/)",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "charger_power"
+                  "power"
                 ],
                 "type": "field"
               },
@@ -1441,7 +1103,7 @@
             {
               "key": "metric",
               "operator": "=",
-              "value": "charger_power"
+              "value": "power"
             },
             {
               "condition": "AND",
@@ -1452,8 +1114,8 @@
           ]
         }
       ],
-      "thresholds": "10,10",
-      "title": "Charger Power",
+      "thresholds": "75,180,300",
+      "title": "Vehicle Power",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -1474,11 +1136,11 @@
       "fill": 1,
       "gridPos": {
         "h": 5,
-        "w": 20,
+        "w": 10,
         "x": 4,
-        "y": 12
+        "y": 8
       },
-      "id": 26,
+      "id": 6,
       "legend": {
         "avg": false,
         "current": false,
@@ -1491,7 +1153,7 @@
       "lines": true,
       "linewidth": 1,
       "links": [],
-      "nullPointMode": "null",
+      "nullPointMode": "connected",
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -1501,61 +1163,12 @@
       "stack": false,
       "steppedLine": false,
       "targets": [
-        {
-          "alias": "charger_power",
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "previous"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "charge_state",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "charger_power"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "metric",
-              "operator": "=",
-              "value": "charger_power"
-            },
-            {
-              "condition": "AND",
-              "key": "display_name",
-              "operator": "=~",
-              "value": "/^$vehicle_name$/"
-            }
-          ]
-        },
         {
           "alias": "power",
           "groupBy": [
             {
               "params": [
-                "$__interval"
+                "1s"
               ],
               "type": "time"
             },
@@ -1569,7 +1182,9 @@
           "measurement": "drive_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "refId": "B",
+          "query": "SELECT mean(\"power\") FROM \"drive_state\" WHERE (\"metric\" = 'power' AND \"display_name\" =~ /^$vehicle_name$/) AND $timeFilter GROUP BY time(1s) fill(previous)",
+          "rawQuery": true,
+          "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
@@ -1604,7 +1219,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Chargerpower vs Batterypower",
+      "title": "Power Revenue",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1642,51 +1257,47 @@
       }
     },
     {
-      "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#299c46",
-        "rgba(237, 129, 40, 0.89)",
-        "#d44a3a"
-      ],
-      "datasource": "${DS_TESLA}",
-      "description": "Energy Added on last Chargesession",
-      "format": "kwatth",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 0,
-        "y": 17
-      },
-      "id": 6,
-      "interval": null,
-      "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
+      "backgroundColor": "rgba(128,128,128,0.1)",
+      "colorMaps": [
         {
-          "name": "value to text",
-          "value": 1
+          "color": "#CCC",
+          "text": "N/A"
         },
         {
-          "name": "range to text",
-          "value": 2
+          "color": "#7EB26D",
+          "text": "online"
+        },
+        {
+          "color": "#bf1b00",
+          "text": "offline"
+        },
+        {
+          "color": "#6ED0E0",
+          "text": "asleep"
+        },
+        {
+          "color": "#052b51",
+          "text": "waking"
         }
       ],
-      "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
+      "crosshairColor": "#8F070C",
+      "datasource": "${DS_TESLA}",
+      "display": "timeline",
+      "expandFromQueryS": 3600,
+      "extendLastValue": true,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "hideTimeOverride": false,
+      "highlightOnMouseover": true,
+      "id": 20,
+      "legendSortBy": "-ms",
+      "lineColor": "rgba(0,0,0,0.1)",
+      "links": [],
+      "metricNameColor": "#000000",
       "rangeMaps": [
         {
           "from": "null",
@@ -1694,32 +1305,30 @@
           "to": "null"
         }
       ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false
-      },
-      "tableColumn": "",
+      "rowHeight": 50,
+      "showLegend": true,
+      "showLegendNames": true,
+      "showLegendPercent": true,
+      "showLegendTime": true,
+      "showLegendValues": true,
+      "showTimeAxis": true,
       "targets": [
         {
           "groupBy": [],
-          "measurement": "charge_state",
+          "measurement": "vehicle_state",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT \"state\" FROM \"vehicle_state\" WHERE (\"metric\" = 'state' AND \"display_name\" =~ /^$vehicle_name$/) AND  $timeFilter\n",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "charge_energy_added"
+                  "state"
                 ],
                 "type": "field"
-              },
-              {
-                "params": [],
-                "type": "last"
               }
             ]
           ],
@@ -1727,7 +1336,7 @@
             {
               "key": "metric",
               "operator": "=",
-              "value": "charge_energy_added"
+              "value": "state"
             },
             {
               "condition": "AND",
@@ -1738,10 +1347,53 @@
           ]
         }
       ],
-      "thresholds": "",
-      "title": "Energy Added",
-      "type": "singlestat",
-      "valueFontSize": "80%",
+      "textSize": 24,
+      "textSizeTime": 12,
+      "timeFrom": null,
+      "timeOptions": [
+        {
+          "name": "Years",
+          "value": "years"
+        },
+        {
+          "name": "Months",
+          "value": "months"
+        },
+        {
+          "name": "Weeks",
+          "value": "weeks"
+        },
+        {
+          "name": "Days",
+          "value": "days"
+        },
+        {
+          "name": "Hours",
+          "value": "hours"
+        },
+        {
+          "name": "Minutes",
+          "value": "minutes"
+        },
+        {
+          "name": "Seconds",
+          "value": "seconds"
+        },
+        {
+          "name": "Milliseconds",
+          "value": "milliseconds"
+        }
+      ],
+      "timePrecision": {
+        "name": "Minutes",
+        "value": "minutes"
+      },
+      "timeShift": null,
+      "timeTextColor": "#d8d9da",
+      "title": "Sleepstate",
+      "type": "natel-discrete-panel",
+      "units": "short",
+      "useTimePrecision": false,
       "valueMaps": [
         {
           "op": "=",
@@ -1749,34 +1401,188 @@
           "value": "null"
         }
       ],
-      "valueName": "avg"
+      "valueTextColor": "#000000",
+      "writeAllValues": false,
+      "writeLastValue": true,
+      "writeMetricNames": false
     },
     {
       "backgroundColor": "rgba(128,128,128,0.1)",
       "colorMaps": [
         {
-          "color": "#7EB26D",
-          "text": "Disconnected"
+          "color": "#BDD",
+          "text": "???"
         },
         {
-          "color": "#EAB839",
-          "text": "Starting"
+          "color": "rgb(76, 76, 76)",
+          "text": "Park"
         },
         {
           "color": "#bf1b00",
-          "text": "Charging"
+          "text": "Reverse"
         },
         {
-          "color": "#EF843C",
-          "text": "Stopped"
+          "color": "#508642",
+          "text": "Drive"
         },
         {
-          "color": "#7eb26d",
-          "text": "Complete"
+          "color": "#BDD",
+          "text": "Neutral"
+        }
+      ],
+      "crosshairColor": "#8F070C",
+      "datasource": "${DS_TESLA}",
+      "display": "timeline",
+      "expandFromQueryS": null,
+      "extendLastValue": true,
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "highlightOnMouseover": true,
+      "id": 24,
+      "legendSortBy": "-ms",
+      "lineColor": "rgba(0,0,0,0.1)",
+      "links": [],
+      "metricNameColor": "#000000",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "rowHeight": 50,
+      "showLegend": true,
+      "showLegendNames": true,
+      "showLegendPercent": true,
+      "showLegendTime": true,
+      "showLegendValues": true,
+      "showTimeAxis": true,
+      "targets": [
+        {
+          "groupBy": [],
+          "measurement": "drive_state",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"shift_state\" FROM \"drive_state\" WHERE (\"metric\" = 'shift_state' AND \"display_name\" =~ /^$vehicle_name$/) AND $timeFilter",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "shift_state"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "metric",
+              "operator": "=",
+              "value": "shift_state"
+            },
+            {
+              "condition": "AND",
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
+            }
+          ]
+        }
+      ],
+      "textSize": 24,
+      "textSizeTime": 12,
+      "timeFrom": null,
+      "timeOptions": [
+        {
+          "name": "Years",
+          "value": "years"
         },
         {
-          "color": "#1F78C1",
-          "text": "NoPower"
+          "name": "Months",
+          "value": "months"
+        },
+        {
+          "name": "Weeks",
+          "value": "weeks"
+        },
+        {
+          "name": "Days",
+          "value": "days"
+        },
+        {
+          "name": "Hours",
+          "value": "hours"
+        },
+        {
+          "name": "Minutes",
+          "value": "minutes"
+        },
+        {
+          "name": "Seconds",
+          "value": "seconds"
+        },
+        {
+          "name": "Milliseconds",
+          "value": "milliseconds"
+        }
+      ],
+      "timePrecision": {
+        "name": "Minutes",
+        "value": "minutes"
+      },
+      "timeTextColor": "#d8d9da",
+      "title": "Drive Mode",
+      "type": "natel-discrete-panel",
+      "units": "short",
+      "useTimePrecision": false,
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "Park",
+          "value": "P"
+        },
+        {
+          "op": "=",
+          "text": "Drive",
+          "value": "D"
+        },
+        {
+          "op": "=",
+          "text": "Neutral",
+          "value": "N"
+        },
+        {
+          "op": "=",
+          "text": "Reverse",
+          "value": "R"
+        }
+      ],
+      "valueTextColor": "#000000",
+      "writeAllValues": false,
+      "writeLastValue": true,
+      "writeMetricNames": false
+    },
+    {
+      "backgroundColor": "rgba(128,128,128,0.1)",
+      "colorMaps": [
+        {
+          "color": "#CCC",
+          "text": "N/A"
+        },
+        {
+          "color": "#7EB26D",
+          "text": "false"
+        },
+        {
+          "color": "#bf1b00",
+          "text": "true"
         }
       ],
       "crosshairColor": "#8F070C",
@@ -1785,13 +1591,13 @@
       "expandFromQueryS": 0,
       "extendLastValue": true,
       "gridPos": {
-        "h": 4,
-        "w": 20,
-        "x": 4,
-        "y": 17
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 21
       },
       "highlightOnMouseover": true,
-      "id": 28,
+      "id": 26,
       "legendSortBy": "-ms",
       "lineColor": "rgba(0,0,0,0.1)",
       "links": [],
@@ -1806,13 +1612,15 @@
       "rowHeight": 50,
       "showDistinctCount": false,
       "showLegend": true,
-      "showLegendNames": false,
+      "showLegendNames": true,
       "showLegendPercent": true,
+      "showLegendTime": true,
       "showLegendValues": true,
       "showTimeAxis": true,
       "showTransitionCount": false,
       "targets": [
         {
+          "alias": "Battery Heater",
           "groupBy": [],
           "measurement": "charge_state",
           "orderByTime": "ASC",
@@ -1823,7 +1631,7 @@
             [
               {
                 "params": [
-                  "charging_state"
+                  "battery_heater_on"
                 ],
                 "type": "field"
               }
@@ -1833,18 +1641,12 @@
             {
               "key": "metric",
               "operator": "=",
-              "value": "charging_state"
-            },
-            {
-              "condition": "AND",
-              "key": "display_name",
-              "operator": "=~",
-              "value": "/^$vehicle_name$/"
+              "value": "battery_heater_on"
             }
           ]
         }
       ],
-      "textSize": 12,
+      "textSize": 24,
       "textSizeTime": 12,
       "timeOptions": [
         {
@@ -1885,7 +1687,7 @@
         "value": "minutes"
       },
       "timeTextColor": "#d8d9da",
-      "title": "Charger Events",
+      "title": "Battery Heater",
       "type": "natel-discrete-panel",
       "units": "short",
       "useTimePrecision": false,
@@ -1894,15 +1696,25 @@
           "op": "=",
           "text": "N/A",
           "value": "null"
+        },
+        {
+          "op": "=",
+          "text": "On",
+          "value": "true"
+        },
+        {
+          "op": "=",
+          "text": "Off",
+          "value": "false"
         }
       ],
       "valueTextColor": "#000000",
-      "writeAllValues": true,
+      "writeAllValues": false,
       "writeLastValue": true,
       "writeMetricNames": false
     }
   ],
-  "refresh": "30s",
+  "refresh": false,
   "schemaVersion": 16,
   "style": "dark",
   "tags": [
@@ -1935,7 +1747,7 @@
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-2d",
     "to": "now"
   },
   "timepicker": {
@@ -1964,7 +1776,7 @@
     ]
   },
   "timezone": "",
-  "title": "Charging",
-  "uid": "dNviSBUmk",
-  "version": 99
+  "title": "Driving",
+  "uid": "Imf45f8iz",
+  "version": 108
 }
