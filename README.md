@@ -3,7 +3,7 @@ Selfhosted API Scraper for pulling Vehicle Statistics from the Tesla Owner API i
 
 **Putting an end to __handing out the Key__ for your 100+ Grand Car to a third party you don't know.**
 
-This can be hosted on any System that's capable of running InfluxDB, Grafana and Python. In this short Guide I assume you're using a Debian'ish Operating System.
+This can be hosted on any System that's capable of running InfluxDB, Grafana and Python. In this short Guide I assume you're using a Debian'ish Operating System. It can run on a dedicated Linux Server out there on the Internets or on your Home Raspberry Pi.
 
 ## Screenshots
 
