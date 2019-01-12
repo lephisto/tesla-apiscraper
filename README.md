@@ -1,7 +1,11 @@
-## tesla-apiscraper
-API Scraper for pulling Vehicle Statistics from the Tesla Owner API into an InfluxDB + Grafana Dashboards
+# tesla-apiscraper
+Selfhosted API Scraper for pulling Vehicle Statistics from the Tesla Owner API into an InfluxDB + Grafana Dashboards.
 
-#Install Dependencies:
+Putting an end to Handing out the Key for your 100+ Grand Car to a third party you don't know.
+
+This can be hosted on any System that's capable of running InfluxDB, Grafana and Python. In this short Guide I assume you're using a Debian'ish Operating System.
+
+## Installation:
 
 - Install Python
 
@@ -15,10 +19,27 @@ sudo apt install python
 
 Additionally I suggest you to setup authentication or close the InfluxDB Port with a Packetfileter of your choice, if the Machine you use for Scraping has a Internetfacing Interface.
 
-- Install Grafana  as in http://docs.grafana.org/installation/debian/
+- Install Grafana as in http://docs.grafana.org/installation/debian/ and import the Dashboard JSON Files included in this repository.
+
+- Install two required Grafana Panels:
+
+- Get Grafana grafana-trackmap-panel
+
+```
+cd /var/lib/grafana/plugins
+git clone https://github.com/pR0Ps/grafana-trackmap-panel
+cd grafana-trackmap-panel
+git checkout releases
+```
+
+- Get Grafana natel-discrete-panel
+
+```
+grafana-cli plugins install natel-discrete-panel
+```
 
 
-# Install API Scraper
+## Install API Scraper
 
 - Get API Scraper
 
@@ -51,10 +72,23 @@ Set Tesla and Influxdb Credentials there.
 
 Afterwards start the Scraping:
 
+```
 python apiscraper.py
+```
 
-Once you know everything is running fine you can start the Scraper to keep running with Screen or tmux, or even write a systemd service.
+Once you know everything is running fine you can start the Scraper to keep running with Screen or tmux, or feel free to write down a systemd service file.
 
 ```
 tmux new-session -s apiscraper 'python apiscraper.py'
 ```
+## Known Limitations and issues
+
+- If you narrow down Timefilter too much, and there are no Measurements, you won't see anything in the Graph and Discrete.
+
+## No
+
+- Due to incoming inquiries: I won't host an Instance of this for you nor provide any extensive Setup Support. This is aimed at people who know what they're doing. If there are Issues, open a Github Issue.
+
+## More Disclaimer
+
+Please note that the use of the Tesla REST API in general and the use of this software in particular is not endorsed by Tesla. You use this software at your own risk. The author does not take responsibility for anything related to the use of this software.

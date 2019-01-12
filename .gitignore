@@ -3,3 +3,5 @@ config.py
 teslajson-master/
 master.zip
 *.pyc
+apiscraper.log
+teslajson.py
