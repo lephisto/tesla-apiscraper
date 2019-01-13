@@ -79,7 +79,7 @@
   "gnetId": null,
   "graphTooltip": 2,
   "id": null,
-  "iteration": 1547309031744,
+  "iteration": 1547403633396,
   "links": [],
   "panels": [
     {
@@ -93,7 +93,7 @@
       ],
       "datasource": "${DS_TESLA}",
       "decimals": 2,
-      "format": "lengthkm",
+      "format": "none",
       "gauge": {
         "maxValue": 100,
         "minValue": 0,
@@ -124,7 +124,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "postfix": "",
+      "postfix": "$rangeunit",
       "postfixFontSize": "50%",
       "prefix": "Ideal",
       "prefixFontSize": "50%",
@@ -2044,5 +2044,5 @@
   "timezone": "",
   "title": "Charging",
   "uid": "dNviSBUmk",
-  "version": 111
+  "version": 112
 }
