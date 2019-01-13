@@ -50,7 +50,9 @@ def setup_custom_logger(name):
     logger.addHandler(screen_handler)
     return logger
 
+
 logger = setup_custom_logger('apiscraper')
+
 
 class StateMonitor(object):
 
@@ -121,7 +123,8 @@ class StateMonitor(object):
                 old_value = self.old_values[request].get(element, '')
                 new_value = result[element]
                 if ((old_value == '') or ((new_value is not None) and (new_value != old_value))):
-                    logger.info("Value Change, SG: " + request + ": Logging..." + element + ": old value: " + str(old_value) + ", new value: " + str(new_value))
+                    logger.info("Value Change, SG: " + request + ": Logging..." + element +
+                                ": old value: " + str(old_value) + ", new value: " + str(new_value))
                     if not header_printed:
                         timestamp = None
                         if "timestamp" in result:
@@ -208,18 +211,21 @@ while True:
         }
     ]
     influxclient.write_points(state_body)
-    logger.info("Car State: " + is_asleep + " Poll Interval: " + str(poll_interval))
+    logger.info("Car State: " + is_asleep +
+                " Poll Interval: " + str(poll_interval))
     if is_asleep == 'asleep' and a_allowsleep == 1:
         logger.info("Car is probably asleep, we let it sleep...")
         poll_interval = 64
         asleep_since += poll_interval
+
     if poll_interval > 1:
         logger.info("Asleep since: " + str(asleep_since) +
-               " Sleeping for " + str(poll_interval) + " seconds..")
+                    " Sleeping for " + str(poll_interval) + " seconds..")
         time.sleep(poll_interval - time.time() % poll_interval)
     elif poll_interval < 0:
         state_monitor.wake_up()
         poll_interval = 1
+
     if poll_interval < 512:
         poll_interval = state_monitor.check_states(poll_interval)
     elif poll_interval < 2048 and is_asleep != 'asleep':

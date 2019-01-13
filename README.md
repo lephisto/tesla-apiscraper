@@ -53,6 +53,11 @@ git checkout releases
 ```
 grafana-cli plugins install natel-discrete-panel
 ```
+- Restart grafana-server afterwards
+
+```
+systemctl restart grafana-server.service
+```
 
 - Import the Dashboard JSON Files included in this repository.
 
