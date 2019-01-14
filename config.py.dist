@@ -6,8 +6,9 @@ a_allowsleep = 1                        # Allow Car to fall asleep / don't wake 
 a_maximumsleep = 1024                   # Wake up every X seconds, if car is asleep
 
 # Scraper API Config (you need that for using the android App)
-#a_apikey = 'somerandomnumberwithenoughdigitsthatcantbeguessedeasily'
-#a_apiport = 8023
+a_enableapi = True
+a_apikey = 'somerandomnumberwithenoughdigitsthatcantbeguessedeasily'
+a_apiport = 8023
 
 # Logging
 a_logfile = 'apiscraper.log'            # APIScraper Logfile

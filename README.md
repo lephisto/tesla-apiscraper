@@ -101,6 +101,19 @@ Once you know everything is running fine you can start the scraper to keep runni
 ```
 tmux new-session -s apiscraper 'python apiscraper.py'
 ```
+
+## Using the API for the Scraper App for android
+
+There's a little Android App, that can help you letting your car sleep and immidiately turn on scraping when needed. You need to uncomment and configure the follwing Values for it in config.py:
+
+```
+a_enableapi = True
+a_apikey = 'somerandomnumberwithenoughdigitsthatcantbeguessedeasily'
+a_apiport = 8023
+```
+
+I strongly recommend to put all this behind a reverse Proxy, probably with HTTP Basic authentication in addition to the API Key.
+
 ## Known Limitations and issues
 
 - If you narrow down Timefilter too much, and there are no Measurements, you won't see anything in the Graph and Discrete.

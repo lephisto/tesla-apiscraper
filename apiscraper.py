@@ -197,7 +197,7 @@ class apiHandler(BaseHTTPRequestHandler):
         s.send_response(200)
         s.send_header("Content-type", "application/json")
         s.end_headers()
-        if (s.path == "/state"):
+        if s.path == "/state" and s.headers.get('apikey') == a_apikey:
             api_response = [
                 {
                     "vin": a_vin,
@@ -219,7 +219,7 @@ if __name__ == "__main__":
     is_asleep = ''
 
     # Create HTTP Server Thread
-    if ((a_apikey is not None) and (a_apikey is not None)):
+    if (a_enableapi):
         server = HTTPServer(('', a_apiport), apiHandler)
         thread = threading.Thread(target=server.serve_forever)
         thread.daemon = True
