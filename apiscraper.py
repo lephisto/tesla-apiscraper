@@ -219,15 +219,16 @@ if __name__ == "__main__":
     is_asleep = ''
 
     # Create HTTP Server Thread
-    server = HTTPServer(('', a_apiport), apiHandler)
-    thread = threading.Thread(target=server.serve_forever)
-    thread.daemon = True
-    try:
-        thread.start()
-        logger.info("HTTP Server Thread started on port " + str(a_apiport))
-    except KeyboardInterrupt:
-        server.shutdown()
-        sys.exit(0)
+    if ((a_apikey is not None) and (a_apikey is not None)):
+        server = HTTPServer(('', a_apiport), apiHandler)
+        thread = threading.Thread(target=server.serve_forever)
+        thread.daemon = True
+        try:
+            thread.start()
+            logger.info("HTTP Server Thread started on port " + str(a_apiport))
+        except KeyboardInterrupt:
+            server.shutdown()
+            sys.exit(0)
 
 # Main Program Loop. messy..
 while True:
