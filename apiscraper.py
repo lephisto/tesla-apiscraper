@@ -230,6 +230,14 @@ if __name__ == "__main__":
             server.shutdown()
             sys.exit(0)
 
+def lastStateReport(f_vin):
+    query="select time,state from vehicle_state where metric='state' and vin='"+ f_vin +"' order by time desc limit 1"
+    influxresult = influxclient.query(query)
+    point = list(influxresult.get_points(measurement='vehicle_state'))
+    return(point[0])
+    #return(ts)
+
+
 # Main Program Loop. messy..
 while True:
     vehicle_state = state_monitor.is_asleep()
@@ -239,6 +247,7 @@ while True:
     is_asleep = vehicle_state['state']
     a_vin = vehicle_state['vin']
     a_displayname = vehicle_state['display_name']
+    pprint(lastStateReport(a_vin))
     ts = int(time.time()) * 1000000000
     state_body = [
         {
