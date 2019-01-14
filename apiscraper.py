@@ -24,6 +24,11 @@ import time
 import urllib2
 import teslajson
 import logging
+import threading
+import json
+
+from BaseHTTPServer import HTTPServer
+from BaseHTTPServer import BaseHTTPRequestHandler
 
 from influxdb import InfluxDBClient
 from pprint import pprint
@@ -147,7 +152,8 @@ class StateMonitor(object):
                                     }
                                 }
                             ]
-                            influxclient.write_points(json_body)
+                            if not a_dryrun:
+                                influxclient.write_points(json_body)
                     self.old_values[request][element] = new_value
         return any_change
 
@@ -180,13 +186,50 @@ class StateMonitor(object):
                 interval *= 2
         return interval
 
+# HTTP Thread Handler
+class apiHandler(BaseHTTPRequestHandler):
+    def do_HEAD(s):
+        s.send_response(200)
+        s.send_header("Content-type", "application/json")
+        s.end_headers()
+
+    def do_GET(s):
+        s.send_response(200)
+        s.send_header("Content-type", "application/json")
+        s.end_headers()
+        if (s.path == "/state"):
+            api_response = [
+                {
+                    "vin": a_vin,
+                    "displayname": a_displayname,
+                    "state": is_asleep,
+                    "scraping": False
+                }
+            ]
+        else:
+            api_response = None
+        s.wfile.write(json.dumps(api_response, indent=4))
+
 
 if __name__ == "__main__":
+    # Create Tesla API Interface
     state_monitor = StateMonitor(a_tesla_email, a_tesla_passwd)
     poll_interval = 0   # Set to -1 to wakeup the Car on Scraper start
     asleep_since = 0
     is_asleep = ''
 
+    # Create HTTP Server Thread
+    server = HTTPServer(('', a_apiport), apiHandler)
+    thread = threading.Thread(target=server.serve_forever)
+    thread.daemon = True
+    try:
+        thread.start()
+        logger.info("HTTP Server Thread started on port " + str(a_apiport))
+    except KeyboardInterrupt:
+        server.shutdown()
+        sys.exit(0)
+
+# Main Program Loop. messy..
 while True:
     vehicle_state = state_monitor.is_asleep()
     # Car woke up
@@ -210,7 +253,8 @@ while True:
             }
         }
     ]
-    influxclient.write_points(state_body)
+    if not a_dryrun:
+        influxclient.write_points(state_body)
     logger.info("Car State: " + is_asleep +
                 " Poll Interval: " + str(poll_interval))
     if is_asleep == 'asleep' and a_allowsleep == 1:
