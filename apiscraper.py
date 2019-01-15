@@ -24,6 +24,7 @@ import time
 import urllib2
 import teslajson
 import logging
+import queue
 import threading
 import json
 
@@ -37,6 +38,7 @@ from config import *
 a_vin = ""
 a_displayname = ""
 a_ignore = ["media_state", "software_update", "speed_limit_mode"]
+
 
 influxclient = InfluxDBClient(
     a_influxhost, a_influxport, a_influxuser, a_influxpass, a_influxdb)
@@ -203,12 +205,31 @@ class apiHandler(BaseHTTPRequestHandler):
                     "vin": a_vin,
                     "displayname": a_displayname,
                     "state": is_asleep,
-                    "scraping": False
+                    "disablescraping": disableScrape,
+                    "interval": poll_interval
                 }
             ]
         else:
             api_response = None
         s.wfile.write(json.dumps(api_response, indent=4))
+
+    #todo
+    def do_POST(s):
+        content_len = int(s.headers.getheader('content-length', 0))
+        post_body = s.rfile.read(content_len)
+        test_data = json.loads(post_body)
+        if test_data['command'] == "switch":
+            disableScrape = test_data['value']
+        print "Switch: " + str(disableScrape);
+        print "post_body(%s)" % (test_data)
+        return test_data
+
+def lastStateReport(f_vin):
+    query="select time,state from vehicle_state where metric='state' and vin='"+ f_vin +"' order by time desc limit 1"
+    influxresult = influxclient.query(query)
+    point = list(influxresult.get_points(measurement='vehicle_state'))
+    return(point[0])
+    #return(ts)
 
 
 if __name__ == "__main__":
@@ -217,9 +238,11 @@ if __name__ == "__main__":
     poll_interval = 0   # Set to -1 to wakeup the Car on Scraper start
     asleep_since = 0
     is_asleep = ''
-
+    disableScrape = True
     # Create HTTP Server Thread
     if (a_enableapi):
+        #queued_request = queue.Queue()
+        #queued_request = "test"
         server = HTTPServer(('', a_apiport), apiHandler)
         thread = threading.Thread(target=server.serve_forever)
         thread.daemon = True
@@ -230,58 +253,57 @@ if __name__ == "__main__":
             server.shutdown()
             sys.exit(0)
 
-def lastStateReport(f_vin):
-    query="select time,state from vehicle_state where metric='state' and vin='"+ f_vin +"' order by time desc limit 1"
-    influxresult = influxclient.query(query)
-    point = list(influxresult.get_points(measurement='vehicle_state'))
-    return(point[0])
-    #return(ts)
 
 
 # Main Program Loop. messy..
 while True:
-    vehicle_state = state_monitor.is_asleep()
-    # Car woke up
-    if is_asleep == 'asleep' and vehicle_state['state'] == 'online':
-        poll_interval = 0
-    is_asleep = vehicle_state['state']
-    a_vin = vehicle_state['vin']
-    a_displayname = vehicle_state['display_name']
-    pprint(lastStateReport(a_vin))
-    ts = int(time.time()) * 1000000000
-    state_body = [
-        {
-            "measurement": 'vehicle_state',
-            "tags": {
-                "vin": vehicle_state['vin'],
-                "display_name": vehicle_state['display_name'],
-                "metric": 'state'
-            },
-            "time": ts,
-            "fields": {
-                "state": is_asleep
+
+    print "disableScrape: " + str(disableScrape)
+    if disableScrape == False:
+        vehicle_state = state_monitor.is_asleep()
+        # Car woke up
+        if is_asleep == 'asleep' and vehicle_state['state'] == 'online':
+            poll_interval = 0
+        is_asleep = vehicle_state['state']
+        a_vin = vehicle_state['vin']
+        a_displayname = vehicle_state['display_name']
+        pprint(lastStateReport(a_vin))
+        ts = int(time.time()) * 1000000000
+        state_body = [
+            {
+                "measurement": 'vehicle_state',
+                "tags": {
+                    "vin": vehicle_state['vin'],
+                    "display_name": vehicle_state['display_name'],
+                    "metric": 'state'
+                },
+                "time": ts,
+                "fields": {
+                    "state": is_asleep
+                }
             }
-        }
-    ]
-    if not a_dryrun:
-        influxclient.write_points(state_body)
-    logger.info("Car State: " + is_asleep +
-                " Poll Interval: " + str(poll_interval))
-    if is_asleep == 'asleep' and a_allowsleep == 1:
-        logger.info("Car is probably asleep, we let it sleep...")
-        poll_interval = 64
-        asleep_since += poll_interval
+        ]
+        if not a_dryrun:
+            influxclient.write_points(state_body)
+        logger.info("Car State: " + is_asleep +
+                    " Poll Interval: " + str(poll_interval))
+        if is_asleep == 'asleep' and a_allowsleep == 1:
+            logger.info("Car is probably asleep, we let it sleep...")
+            poll_interval = 64
+            asleep_since += poll_interval
 
-    if poll_interval > 1:
-        logger.info("Asleep since: " + str(asleep_since) +
-                    " Sleeping for " + str(poll_interval) + " seconds..")
-        time.sleep(poll_interval - time.time() % poll_interval)
-    elif poll_interval < 0:
-        state_monitor.wake_up()
-        poll_interval = 1
+        if poll_interval > 1:
+            logger.info("Asleep since: " + str(asleep_since) +
+                        " Sleeping for " + str(poll_interval) + " seconds..")
+            time.sleep(poll_interval - time.time() % poll_interval)
+        elif poll_interval < 0:
+            state_monitor.wake_up()
+            poll_interval = 1
 
-    if poll_interval < 512:
-        poll_interval = state_monitor.check_states(poll_interval)
-    elif poll_interval < 2048 and is_asleep != 'asleep':
-        poll_interval *= 2
+        if poll_interval < 512:
+            poll_interval = state_monitor.check_states(poll_interval)
+        elif poll_interval < 2048 and is_asleep != 'asleep':
+            poll_interval *= 2
+    else:
+        time.sleep(5)
     sys.stdout.flush()
