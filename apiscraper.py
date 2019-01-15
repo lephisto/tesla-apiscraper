@@ -101,7 +101,7 @@ class StateMonitor(object):
                 logger.info("Getting vehicle state")
                 connection = teslajson.Connection(
                     a_tesla_email, a_tesla_passwd)
-                self.vehicle = connection.vehicles[0]
+                self.vehicle = connection.vehicles[a_tesla_caridx]
                 return self.vehicle
             except (KeyError, urllib2.HTTPError, urllib2.URLError) as details:
                 delay *= 2
