@@ -130,6 +130,10 @@ class StateMonitor(object):
         for request in self.requests:
             header_printed = False
             result=r['response'][request]
+            timestamp = result['timestamp']
+            if self.old_values[request].get('timestamp', '') == timestamp:
+                break
+            self.old_values[request]['timestamp'] = timestamp
             for element in sorted(result):
                 if element not in ("timestamp", "gps_as_of", "left_temp_direction", "right_temp_direction"):
                     old_value = self.old_values[request].get(element, '')
