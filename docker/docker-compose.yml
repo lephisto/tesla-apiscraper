@@ -1,0 +1,38 @@
+version: '3'
+services:
+   influxdb:
+     image: influxdb:latest
+     container_name: influxdb
+     ports:
+       - "8083:8083"
+       - "8086:8086"
+       - "8090:8090"
+     environment:
+       - "INFLUXDB_DB=tesla"
+       - "INFLUXDB_WRITE_USER=tesla"
+       - "INFLUXDB_WRITE_PASSWORD=tesla"
+     volumes:
+       - ${DATA_PATH}/influxdb:/var/lib/influxdb
+
+   grafana:
+     links:
+       - "influxdb:database"
+     image: grafana/grafana:latest
+     container_name: grafana
+     ports:
+       - "3000:3000"
+     environment:
+       - "GF_INSTALL_PLUGINS=natel-discrete-panel"
+     volumes:
+       - ${DATA_PATH}/grafana:/var/lib/grafana
+       - ./provisioning:/etc/grafana/provisioning/
+       - ../grafana-dashboards/:/var/lib/grafana/dashboards
+
+   apiscraper:
+     network_mode: host
+     build: .
+     container_name: apiscraper
+     volumes:
+       - ${DATA_PATH}:${DATA_PATH}
+     environment:
+       WAIT_HOSTS: influxdb:8086

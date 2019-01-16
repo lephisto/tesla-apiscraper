@@ -1,0 +1,10 @@
+apiVersion: 1
+
+datasources:
+  - name: tesla
+    type: influxdb
+    database: tesla
+    user: tesla
+    password: tesla
+    url: http://localhost:8086
+
