@@ -193,12 +193,28 @@ class StateMonitor(object):
         if interval == 0:
             interval = 1
 
-        if any_change:  # there have been changes, reduce interval
-            if interval > 1:
-                interval /= 2
-        else:   # there haven't been any changes, increase interval to allow the car to fall asleep
-            if interval < 512:
-                interval *= 2
+        # If we are charging at a supercharger, it's worth polling frequently
+        # since the changes are fast. For regular charging 16 seconds
+        # interval seems to be doing ok on my 72A/16kW charger, perhaps
+        # we can even poll every 32 seconds on 40A and below? Polling
+        # based on values changing is not good because there's constant +-1V
+        # jitter on the source power that results in needless overhead
+        if self.old_values['charge_state'].get('charging_state', '') == "Charging":
+            if self.old_values['charge_state'].get('fast_charger_present', '') == "true":
+                interval = 2
+            else:
+                interval = 16
+
+        # If we are not charging (and not moving), then we can use the
+        # usual logic to determine how often to poll based on how much
+        # activity we see.
+        else:
+            if any_change:  # there have been changes, reduce interval
+                if interval > 1:
+                    interval /= 2
+            else:   # there haven't been any changes, increase interval to allow the car to fall asleep
+                if interval < 512:
+                    interval *= 2
         return interval
 
 def lastStateReport(f_vin):
