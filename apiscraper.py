@@ -24,12 +24,13 @@ import time
 import urllib2
 import teslajson
 import logging
-import queue
 import threading
 import json
+import Queue
 
 from BaseHTTPServer import HTTPServer
 from BaseHTTPServer import BaseHTTPRequestHandler
+from io import BytesIO
 
 from influxdb import InfluxDBClient
 from pprint import pprint
@@ -39,6 +40,7 @@ a_vin = ""
 a_displayname = ""
 a_ignore = ["media_state", "software_update", "speed_limit_mode"]
 
+postq = Queue.Queue()
 
 influxclient = InfluxDBClient(
     a_influxhost, a_influxport, a_influxuser, a_influxpass, a_influxdb)
@@ -188,8 +190,15 @@ class StateMonitor(object):
                 interval *= 2
         return interval
 
+def lastStateReport(f_vin):
+    query="select time,state from vehicle_state where metric='state' and vin='"+ f_vin +"' order by time desc limit 1"
+    influxresult = influxclient.query(query)
+    point = list(influxresult.get_points(measurement='vehicle_state'))
+    return(point[0])
+
 # HTTP Thread Handler
 class apiHandler(BaseHTTPRequestHandler):
+
     def do_HEAD(s):
         s.send_response(200)
         s.send_header("Content-type", "application/json")
@@ -203,10 +212,12 @@ class apiHandler(BaseHTTPRequestHandler):
             api_response = [
                 {
                     "vin": a_vin,
+                    "apikey": a_apikey,
                     "displayname": a_displayname,
                     "state": is_asleep,
-                    "disablescraping": disableScrape,
-                    "interval": poll_interval
+                    "disablescraping": s.server.api_disablescrape,
+                    "disabledsince": s.server.api_disabledsince,
+                    "interval": s.server.api_poll_interval
                 }
             ]
         else:
@@ -215,21 +226,27 @@ class apiHandler(BaseHTTPRequestHandler):
 
     #todo
     def do_POST(s):
-        content_len = int(s.headers.getheader('content-length', 0))
-        post_body = s.rfile.read(content_len)
-        test_data = json.loads(post_body)
-        if test_data['command'] == "switch":
-            disableScrape = test_data['value']
-        print "Switch: " + str(disableScrape);
-        print "post_body(%s)" % (test_data)
-        return test_data
+        content_length = int(s.headers['Content-Length'])
+        body = s.rfile.read(content_length)
+        s.send_response(200)
+        s.end_headers()
+        s.server.pqueue.put(body)
 
-def lastStateReport(f_vin):
-    query="select time,state from vehicle_state where metric='state' and vin='"+ f_vin +"' order by time desc limit 1"
-    influxresult = influxclient.query(query)
-    point = list(influxresult.get_points(measurement='vehicle_state'))
-    return(point[0])
-    #return(ts)
+
+class QueuingHTTPServer(HTTPServer):
+    def __init__(self, server_address, RequestHandlerClass, pqueue, bind_and_activate=True):
+        HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
+        self.pqueue = postq
+
+def run_server(port, pq):
+    print('run_server')
+    httpd = QueuingHTTPServer(('0.0.0.0', port), apiHandler, pq)
+    while True:
+        print("HANDLE: " + threading.current_thread().name)
+        httpd.api_disablescrape = disableScrape
+        httpd.api_poll_interval = poll_interval
+        httpd.api_disabledsince = disabledsince
+        httpd.handle_request()
 
 
 if __name__ == "__main__":
@@ -239,12 +256,10 @@ if __name__ == "__main__":
     asleep_since = 0
     is_asleep = ''
     disableScrape = True
+    disabledsince = 0
     # Create HTTP Server Thread
     if (a_enableapi):
-        #queued_request = queue.Queue()
-        #queued_request = "test"
-        server = HTTPServer(('', a_apiport), apiHandler)
-        thread = threading.Thread(target=server.serve_forever)
+        thread = threading.Thread(target=run_server, args=(a_apiport,postq))
         thread.daemon = True
         try:
             thread.start()
@@ -253,13 +268,13 @@ if __name__ == "__main__":
             server.shutdown()
             sys.exit(0)
 
-
-
 # Main Program Loop. messy..
 while True:
-
-    print "disableScrape: " + str(disableScrape)
+    if not postq.empty():
+        command = json.loads(postq.get())
+        disableScrape = command['value']
     if disableScrape == False:
+        disabledsince = 0
         vehicle_state = state_monitor.is_asleep()
         # Car woke up
         if is_asleep == 'asleep' and vehicle_state['state'] == 'online':
@@ -267,7 +282,6 @@ while True:
         is_asleep = vehicle_state['state']
         a_vin = vehicle_state['vin']
         a_displayname = vehicle_state['display_name']
-        pprint(lastStateReport(a_vin))
         ts = int(time.time()) * 1000000000
         state_body = [
             {
@@ -296,6 +310,8 @@ while True:
             logger.info("Asleep since: " + str(asleep_since) +
                         " Sleeping for " + str(poll_interval) + " seconds..")
             time.sleep(poll_interval - time.time() % poll_interval)
+
+        poll_interval = state_monitor.check_states(poll_interval)
         elif poll_interval < 0:
             state_monitor.wake_up()
             poll_interval = 1
@@ -305,5 +321,6 @@ while True:
         elif poll_interval < 2048 and is_asleep != 'asleep':
             poll_interval *= 2
     else:
-        time.sleep(5)
+        disabledsince += 1
+        time.sleep(1)
     sys.stdout.flush()
