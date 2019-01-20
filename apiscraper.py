@@ -118,76 +118,103 @@ class StateMonitor(object):
                 logger.info("Waiting %d seconds before retrying." % delay)
                 time.sleep(delay)
 
-    def request_state_group(self, request):
+    def request_state_group(self):
         global a_vin
         global a_displayname
         global a_ignore
-        # Request and process one group of Tesla states.
-        header_printed = False
+        # Request and process all Tesla states
         any_change = False
-        logger.info(">> Request Data: " + request)
-        result = self.vehicle.data_request(request)
-        for element in sorted(result):
-            if element not in ("timestamp", "gps_as_of", "left_temp_direction", "right_temp_direction"):
-                old_value = self.old_values[request].get(element, '')
-                new_value = result[element]
-                if ((old_value == '') or ((new_value is not None) and (new_value != old_value))):
-                    logger.info("Value Change, SG: " + request + ": Logging..." + element +
-                                ": old value: " + str(old_value) + ", new value: " + str(new_value))
-                    if not header_printed:
-                        timestamp = None
-                        if "timestamp" in result:
-                            timestamp = result["timestamp"] / 1000
-                        header_printed = True
-                        any_change = True
-                    if new_value != None:
-                        if element not in a_ignore:
-                            json_body = [
-                                {
-                                    "measurement": request,
-                                    "tags": {
-                                        "vin": a_vin,
-                                        "display_name": a_displayname,
-                                        "metric": element
-                                    },
-                                    "time": timestamp * 1000000000,
-                                    "fields": {
-                                        element: new_value
+        logger.info(">> Request vehicle data")
+        r = self.vehicle.get("vehicle_data")
+
+        for request in self.requests:
+            header_printed = False
+            result=r['response'][request]
+            timestamp = result['timestamp']
+            if self.old_values[request].get('timestamp', '') == timestamp:
+                break
+            self.old_values[request]['timestamp'] = timestamp
+            for element in sorted(result):
+                if element not in ("timestamp", "gps_as_of", "left_temp_direction", "right_temp_direction"):
+                    old_value = self.old_values[request].get(element, '')
+                    new_value = result[element]
+                    if ((old_value == '') or ((new_value is not None) and (new_value != old_value))):
+                        logger.info("Value Change, SG: " + request + ": Logging..." + element +
+                                    ": old value: " + str(old_value) + ", new value: " + str(new_value))
+                        if not header_printed:
+                            timestamp = None
+                            if "timestamp" in result:
+                                timestamp = result["timestamp"] / 1000
+                            header_printed = True
+                            any_change = True
+                        if new_value != None:
+                            if element not in a_ignore:
+                                json_body = [
+                                    {
+                                        "measurement": request,
+                                        "tags": {
+                                            "vin": a_vin,
+                                            "display_name": a_displayname,
+                                            "metric": element
+                                        },
+                                        "time": timestamp * 1000000000,
+                                        "fields": {
+                                            element: new_value
+                                        }
                                     }
-                                }
-                            ]
-                            if not a_dryrun:
-                                influxclient.write_points(json_body)
-                    self.old_values[request][element] = new_value
+                                ]
+                                if not a_dryrun:
+                                    influxclient.write_points(json_body)
+                        self.old_values[request][element] = new_value
         return any_change
 
     def check_states(self, interval):
         # Check all Tesla States
         any_change = False
-        for request in self.priority_requests.get(interval, self.requests):
-            try:
-                if interval > 32 and (request == "drive_state" or request == "charge_state"):
-                    if self.request_state_group(request):
-                        any_change = True
-                        if request == "drive_state":
-                            interval = 1
-                elif interval <= 32:
-                    if self.request_state_group(request):
-                        any_change = True
-                        if request == "drive_state":
-                            interval = 1
-            except (urllib2.HTTPError, urllib2.URLError) as exc:
-                logger.info("HTTP Error: " + str(exc))
-                if a_allowsleep == 1:
-                    return interval
-                else:
-                    return -1  # re-initialize.
-        if any_change:  # there have been changes, reduce interval
-            if interval > 1:
-                interval /= 2
-        else:   # there haven't been any changes, increase interval to allow the car to fall asleep
-            if interval < 512:
-                interval *= 2
+        try:
+            if self.request_state_group():
+                any_change = True
+            else:
+                shift = self.old_values['drive_state'].get('shift_state', '');
+                if shift == "R" or shift == "D":
+                    # We are actively driving, does not matter we are
+                    # stopped at a traffic light or whatnot,
+                    # keep polling
+                    interval = 1
+                    any_change = True
+
+        except (urllib2.HTTPError, urllib2.URLError) as exc:
+            logger.info("HTTP Error: " + str(exc))
+            if a_allowsleep == 1:
+                return interval
+            else:
+                return -1  # re-initialize.
+
+        if interval == 0:
+            interval = 1
+
+        # If we are charging at a supercharger, it's worth polling frequently
+        # since the changes are fast. For regular charging 16 seconds
+        # interval seems to be doing ok on my 72A/16kW charger, perhaps
+        # we can even poll every 32 seconds on 40A and below? Polling
+        # based on values changing is not good because there's constant +-1V
+        # jitter on the source power that results in needless overhead
+        if self.old_values['charge_state'].get('charging_state', '') == "Charging":
+            if self.old_values['charge_state'].get('fast_charger_present', '') == "true":
+                interval = 2
+            else:
+                interval = 16
+
+        # If we are not charging (and not moving), then we can use the
+        # usual logic to determine how often to poll based on how much
+        # activity we see.
+        else:
+            if any_change:  # there have been changes, reduce interval
+                if interval > 1:
+                    interval /= 2
+            else:   # there haven't been any changes, increase interval to allow the car to fall asleep
+                if interval < 512:
+                    interval *= 2
         return interval
 
 def lastStateReport(f_vin):
@@ -268,6 +295,11 @@ if __name__ == "__main__":
             server.shutdown()
             sys.exit(0)
 
+# XXX - this is to make sure we have it initialized for the uses below
+# if we did not call into is_asleep() (Which we did not since we start with
+# a small interval
+vehicle_state = state_monitor.is_asleep()
+
 # Main Program Loop. messy..
 while True:
     if not postq.empty():
@@ -275,7 +307,10 @@ while True:
         disableScrape = command['value']
     if disableScrape == False:
         disabledsince = 0
-        vehicle_state = state_monitor.is_asleep()
+        # We cannot be sleeping with small poll interval for sure.
+        # In fact can we be sleeping at all if scraping is enabled?
+        if poll_interval >= 64:
+            vehicle_state = state_monitor.is_asleep()
         # Car woke up
         if is_asleep == 'asleep' and vehicle_state['state'] == 'online':
             poll_interval = 0
@@ -314,6 +349,8 @@ while True:
         elif poll_interval < 0:
             state_monitor.wake_up()
             poll_interval = 1
+        else:
+            time.sleep(1)
 
         if poll_interval < 512:
             poll_interval = state_monitor.check_states(poll_interval)
