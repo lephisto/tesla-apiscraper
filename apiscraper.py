@@ -310,8 +310,7 @@ while True:
             logger.info("Asleep since: " + str(asleep_since) +
                         " Sleeping for " + str(poll_interval) + " seconds..")
             time.sleep(poll_interval - time.time() % poll_interval)
-
-        poll_interval = state_monitor.check_states(poll_interval)
+            poll_interval = state_monitor.check_states(poll_interval)
         elif poll_interval < 0:
             state_monitor.wake_up()
             poll_interval = 1
