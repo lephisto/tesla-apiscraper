@@ -213,7 +213,7 @@ class StateMonitor(object):
                 if interval > 1:
                     interval /= 2
             else:   # there haven't been any changes, increase interval to allow the car to fall asleep
-                if interval < 512:
+                if interval < 2048:
                     interval *= 2
         return interval
 
@@ -279,10 +279,10 @@ def run_server(port, pq):
 if __name__ == "__main__":
     # Create Tesla API Interface
     state_monitor = StateMonitor(a_tesla_email, a_tesla_passwd)
-    poll_interval = 0   # Set to -1 to wakeup the Car on Scraper start
+    poll_interval = 1   # Set to -1 to wakeup the Car on Scraper start
     asleep_since = 0
     is_asleep = ''
-    disableScrape = True
+    disableScrape = False
     disabledsince = 0
     # Create HTTP Server Thread
     if (a_enableapi):
@@ -304,7 +304,9 @@ vehicle_state = state_monitor.is_asleep()
 while True:
     if not postq.empty():
         command = json.loads(postq.get())
+        pprint(command)
         disableScrape = command['value']
+        poll_interval = 1
     if disableScrape == False:
         disabledsince = 0
         # We cannot be sleeping with small poll interval for sure.
@@ -341,7 +343,7 @@ while True:
             poll_interval = 64
             asleep_since += poll_interval
 
-        if poll_interval > 1:
+        if poll_interval > 0:
             logger.info("Asleep since: " + str(asleep_since) +
                         " Sleeping for " + str(poll_interval) + " seconds..")
             time.sleep(poll_interval - time.time() % poll_interval)
@@ -351,11 +353,6 @@ while True:
             poll_interval = 1
         else:
             time.sleep(1)
-
-        if poll_interval < 512:
-            poll_interval = state_monitor.check_states(poll_interval)
-        elif poll_interval < 2048 and is_asleep != 'asleep':
-            poll_interval *= 2
     else:
         disabledsince += 1
         time.sleep(1)
