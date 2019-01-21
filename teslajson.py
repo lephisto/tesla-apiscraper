@@ -75,6 +75,9 @@ class Connection(object):
             self.expiration = 0 # force refresh
         self.vehicles = [Vehicle(v, self) for v in self.get('vehicles')['response']]
 
+    def refresh_vehicle(self):
+        self.vehicles = [Vehicle(v, self) for v in self.get('vehicles')['response']]
+
     def get(self, command):
         """Utility command to get data from API"""
         return self.post(command, None)

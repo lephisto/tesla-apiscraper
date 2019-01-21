@@ -59,14 +59,10 @@ def setup_custom_logger(name):
     logger.addHandler(screen_handler)
     return logger
 
-
 logger = setup_custom_logger('apiscraper')
 
-
 class StateMonitor(object):
-
     """ Monitor all Tesla states."""
-
     def __init__(self, a_tesla_email, a_tesla_passwd):
         self.requests = ("charge_state", "climate_state", "drive_state",
                          "gui_settings", "vehicle_state")
@@ -75,18 +71,22 @@ class StateMonitor(object):
                                   4: ("charge_state", "drive_state", )}
         self.old_values = dict([(r, {}) for r in self.requests])
 
-        connection = teslajson.Connection(a_tesla_email, a_tesla_passwd)
-        self.vehicle = connection.vehicles[a_tesla_caridx]
+        self.connection = teslajson.Connection(a_tesla_email, a_tesla_passwd)
+        self.vehicle = self.connection.vehicles[a_tesla_caridx]
+
+    def refresh_vehicle(self):
+        #refreshes the vehicle object
+        logger.info(">> self.connection.refresh_vehicle()")
+        self.connection.refresh_vehicle()
+        self.vehicle = self.connection.vehicles[a_tesla_caridx]
 
     def ongoing_activity_status(self):
         """ True if the car is not in park, or is actively charging ... """
         shift = self.old_values['drive_state'].get('shift_state', '');
         if shift == "R" or shift == "D" or shift == "N":
             return True
-
         if self.old_values['charge_state'].get('charging_state', '') == "Charging":
             return True
-
         return False
 
     def wake_up(self):
@@ -108,21 +108,6 @@ class StateMonitor(object):
                     if element == "display_name":
                         a_displayname = result[element]
                 return
-            except (KeyError, urllib2.HTTPError, urllib2.URLError) as details:
-                delay *= 2
-                logger.warning("HTTP Error:" + str(details))
-                logger.info("Waiting %d seconds before retrying." % delay)
-                time.sleep(delay)
-
-    def is_asleep(self):
-        delay = 1
-        while True:
-            try:
-                logger.info("Getting vehicle state")
-                connection = teslajson.Connection(
-                    a_tesla_email, a_tesla_passwd)
-                self.vehicle = connection.vehicles[a_tesla_caridx]
-                return self.vehicle
             except (KeyError, urllib2.HTTPError, urllib2.URLError) as details:
                 delay *= 2
                 logger.warning("HTTP Error:" + str(details))
@@ -293,7 +278,6 @@ class QueuingHTTPServer(HTTPServer):
         self.pqueue = postq
 
 def run_server(port, pq):
-    print('run_server')
     httpd = QueuingHTTPServer(('0.0.0.0', port), apiHandler, pq)
     while True:
         print("HANDLE: " + threading.current_thread().name)
@@ -301,7 +285,6 @@ def run_server(port, pq):
         httpd.api_poll_interval = poll_interval
         httpd.api_disabledsince = disabledsince
         httpd.handle_request()
-
 
 if __name__ == "__main__":
     # Create Tesla API Interface
@@ -311,6 +294,7 @@ if __name__ == "__main__":
     is_asleep = ''
     disableScrape = a_start_disabled
     disabledsince = 0
+    mainloopcount = 0
     # Create HTTP Server Thread
     if (a_enableapi):
         thread = threading.Thread(target=run_server, args=(a_apiport,postq))
@@ -322,39 +306,34 @@ if __name__ == "__main__":
             server.shutdown()
             sys.exit(0)
 
-# XXX - this is to make sure we have it initialized for the uses below
-# if we did not call into is_asleep() (Which we did not since we start with
-# a small interval
-vehicle_state = state_monitor.is_asleep()
-
 # Main Program Loop. messy..
 while True:
+    #Look if there's something from the WEbservers Post Queue
     if not postq.empty():
         command = json.loads(postq.get())
         pprint(command)
         disableScrape = command['value']
         if not disableScrape:
             poll_interval = 1
-
     if disableScrape == False or state_monitor.ongoing_activity_status():
         disabledsince = 0
         # We cannot be sleeping with small poll interval for sure.
         # In fact can we be sleeping at all if scraping is enabled?
-        #if poll_interval >= 64:
-        vehicle_state = state_monitor.is_asleep()
+        if poll_interval >= 64:
+            state_monitor.refresh_vehicle()
         # Car woke up
-        if is_asleep == 'asleep' and vehicle_state['state'] == 'online':
+        if is_asleep == 'asleep' and state_monitor.vehicle['state'] == 'online':
             poll_interval = 0
-        is_asleep = vehicle_state['state']
-        a_vin = vehicle_state['vin']
-        a_displayname = vehicle_state['display_name']
+        is_asleep = state_monitor.vehicle['state']
+        a_vin = state_monitor.vehicle['vin']
+        a_displayname = state_monitor.vehicle['display_name']
         ts = int(time.time()) * 1000000000
         state_body = [
             {
                 "measurement": 'vehicle_state',
                 "tags": {
-                    "vin": vehicle_state['vin'],
-                    "display_name": vehicle_state['display_name'],
+                    "vin": state_monitor.vehicle['vin'],
+                    "display_name": state_monitor.vehicle['display_name'],
                     "metric": 'state'
                 },
                 "time": ts,
@@ -376,7 +355,8 @@ while True:
             logger.info("Asleep since: " + str(asleep_since) +
                         " Sleeping for " + str(poll_interval) + " seconds..")
             time.sleep(poll_interval - time.time() % poll_interval)
-            poll_interval = state_monitor.check_states(poll_interval)
+            if is_asleep != 'asleep':
+                poll_interval = state_monitor.check_states(poll_interval)
         elif poll_interval < 0:
             state_monitor.wake_up()
             poll_interval = 1
