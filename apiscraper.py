@@ -232,12 +232,11 @@ class apiHandler(BaseHTTPRequestHandler):
         s.end_headers()
 
     def do_GET(s):
-        s.send_response(200)
-        s.send_header("Content-type", "application/json")
-        s.end_headers()
         if s.path == "/state" and s.headers.get('apikey') == a_apikey:
+            s.send_response(200)
             api_response = [
                 {
+                    "result": "ok",
                     "vin": a_vin,
                     "apikey": a_apikey,
                     "displayname": a_displayname,
@@ -248,17 +247,29 @@ class apiHandler(BaseHTTPRequestHandler):
                 }
             ]
         else:
-            api_response = None
+            s.send_response(400)
+            api_response = [
+                {
+                    "result": "fail"
+                }
+            ]
+        s.send_header("Content-type", "application/json")
+        s.end_headers()
         s.wfile.write(json.dumps(api_response, indent=4))
 
     #todo
     def do_POST(s):
-        content_length = int(s.headers['Content-Length'])
-        body = s.rfile.read(content_length)
-        s.send_response(200)
+        if s.path == "/switch" and s.headers.get('apikey') == a_apikey:
+            content_length = int(s.headers['Content-Length'])
+            body = s.rfile.read(content_length)
+            if command != None:
+                s.send_response(200)
+                s.server.pqueue.put(body)
+            else:
+                s.send_response(401)
+        else:
+            s.send_response(400)
         s.end_headers()
-        s.server.pqueue.put(body)
-
 
 class QueuingHTTPServer(HTTPServer):
     def __init__(self, server_address, RequestHandlerClass, pqueue, bind_and_activate=True):
@@ -306,7 +317,9 @@ while True:
         command = json.loads(postq.get())
         pprint(command)
         disableScrape = command['value']
-        poll_interval = 1
+        if not disableScrape:
+            poll_interval = 1
+
     if disableScrape == False:
         disabledsince = 0
         # We cannot be sleeping with small poll interval for sure.
