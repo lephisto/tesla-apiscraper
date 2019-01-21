@@ -78,7 +78,7 @@ class StateMonitor(object):
         connection = teslajson.Connection(a_tesla_email, a_tesla_passwd)
         self.vehicle = connection.vehicles[a_tesla_caridx]
 
-    def ongoing_activity_status(self)
+    def ongoing_activity_status(self):
         """ True if the car is not in park, or is actively charging ... """
         shift = self.old_values['drive_state'].get('shift_state', '');
         if shift == "R" or shift == "D" or shift == "N":
