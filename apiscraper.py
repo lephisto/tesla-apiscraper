@@ -78,6 +78,17 @@ class StateMonitor(object):
         connection = teslajson.Connection(a_tesla_email, a_tesla_passwd)
         self.vehicle = connection.vehicles[a_tesla_caridx]
 
+    def ongoing_activity_status(self)
+        """ True if the car is not in park, or is actively charging ... """
+        shift = self.old_values['drive_state'].get('shift_state', '');
+        if shift == "R" or shift == "D" or shift == "N":
+            return True
+
+        if self.old_values['charge_state'].get('charging_state', '') == "Charging":
+            return True
+
+        return False
+
     def wake_up(self):
         """ mod """
         global a_vin
@@ -320,7 +331,7 @@ while True:
         if not disableScrape:
             poll_interval = 1
 
-    if disableScrape == False:
+    if disableScrape == False or state_monitor.ongoing_activity_status():
         disabledsince = 0
         # We cannot be sleeping with small poll interval for sure.
         # In fact can we be sleeping at all if scraping is enabled?
