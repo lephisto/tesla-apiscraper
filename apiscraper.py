@@ -282,7 +282,7 @@ if __name__ == "__main__":
     poll_interval = 1   # Set to -1 to wakeup the Car on Scraper start
     asleep_since = 0
     is_asleep = ''
-    disableScrape = False
+    disableScrape = a_start_disabled
     disabledsince = 0
     # Create HTTP Server Thread
     if (a_enableapi):
