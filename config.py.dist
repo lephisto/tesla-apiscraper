@@ -9,6 +9,9 @@ a_maximumsleep = 1024                   # Wake up every X seconds, if car is asl
 a_enableapi = True
 a_apikey = 'somerandomnumberwithenoughdigitsthatcantbeguessedeasily'
 a_apiport = 8023
+a_start_disabled = False		# Scrapper state on startup. This could
+					# be changed with the app if the
+					# a_enableapi is True
 
 # Logging
 a_logfile = 'apiscraper.log'            # APIScraper Logfile
