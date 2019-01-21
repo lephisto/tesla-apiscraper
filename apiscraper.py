@@ -270,10 +270,13 @@ class apiHandler(BaseHTTPRequestHandler):
 
     #todo
     def do_POST(s):
+        pprint(s.headers)
+        print("DEBUG POST: " + s.path + "API KEY:" + s.headers.get('apikey'))
         if s.path == "/switch" and s.headers.get('apikey') == a_apikey:
             content_length = int(s.headers['Content-Length'])
             body = s.rfile.read(content_length)
-            if command != None:
+            command = json.loads(body)
+            if command['command'] != None:
                 s.send_response(200)
                 s.server.pqueue.put(body)
             else:
@@ -335,8 +338,8 @@ while True:
         disabledsince = 0
         # We cannot be sleeping with small poll interval for sure.
         # In fact can we be sleeping at all if scraping is enabled?
-        if poll_interval >= 64:
-            vehicle_state = state_monitor.is_asleep()
+        #if poll_interval >= 64:
+        vehicle_state = state_monitor.is_asleep()
         # Car woke up
         if is_asleep == 'asleep' and vehicle_state['state'] == 'online':
             poll_interval = 0
