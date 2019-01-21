@@ -149,6 +149,8 @@ class StateMonitor(object):
                 if element not in ("timestamp", "gps_as_of", "left_temp_direction", "right_temp_direction"):
                     old_value = self.old_values[request].get(element, '')
                     new_value = result[element]
+                    if element == "vehicle_name" and not new_value:
+                        continue
                     if ((old_value == '') or ((new_value is not None) and (new_value != old_value))):
                         logger.info("Value Change, SG: " + request + ": Logging..." + element +
                                     ": old value: " + str(old_value) + ", new value: " + str(new_value))
