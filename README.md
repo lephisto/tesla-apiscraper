@@ -101,6 +101,23 @@ Once you know everything is running fine you can start the scraper to keep runni
 ```
 tmux new-session -s apiscraper 'python apiscraper.py'
 ```
+
+## Building with Docker
+
+Alternatively, you can build and run tesla-apiscraper via Docker.
+
+To build, run:
+
+```
+docker build ./ -t tesla-apiscraper
+```
+
+To run it, use:
+
+```
+docker run -p 3000:3000 -e "TESLA_USERNAME=<your tesla email>" -e "TESLA_PASSWORD=<your tesla password>" tesla-apiscraper:latest
+```
+
 ## Known Limitations and issues
 
 - If you narrow down Timefilter too much, and there are no Measurements, you won't see anything in the Graph and Discrete.
