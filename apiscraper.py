@@ -89,6 +89,8 @@ class StateMonitor(object):
         if self.old_values['charge_state'].get('charging_state', '') in [
                 "Charging", "Starting"]:
             return True
+        if self.old_values['climate_state'].get('is_climate_on', False):
+            return True
         return False
 
     def wake_up(self):
