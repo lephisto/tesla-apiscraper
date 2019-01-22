@@ -233,6 +233,10 @@ class apiHandler(BaseHTTPRequestHandler):
     def do_GET(s):
         if s.path == "/state" and s.headers.get('apikey') == a_apikey:
             s.send_response(200)
+            if s.server.api_busysince:
+                processingtime = int(time.time()) - s.server.api_busysince
+            else:
+                processingtime = 0
             api_response = [
                 {
                     "result": "ok",
@@ -243,7 +247,8 @@ class apiHandler(BaseHTTPRequestHandler):
                     "disablescraping": s.server.api_disablescrape,
                     "carstate": s.server.api_caractive,
                     "disabledsince": s.server.api_disabledsince,
-                    "interval": s.server.api_poll_interval
+                    "interval": s.server.api_poll_interval,
+                    "busy": processingtime
                 }
             ]
         else:
@@ -290,6 +295,7 @@ def run_server(port, pq, cond):
         httpd.api_disablescrape = disableScrape
         httpd.api_poll_interval = poll_interval
         httpd.api_disabledsince = disabledsince
+        httpd.api_busysince = busysince
         httpd.api_caractive = state_monitor.ongoing_activity_status()
         httpd.handle_request()
 
@@ -302,6 +308,7 @@ if __name__ == "__main__":
     disableScrape = a_start_disabled
     disabledsince = 0
     mainloopcount = 0
+    busysince = 0
     # Create HTTP Server Thread
     if (a_enableapi):
         thread = threading.Thread(target=run_server, args=(a_apiport, postq, http_condition))
@@ -327,6 +334,7 @@ while True:
 
     if disableScrape == False or state_monitor.ongoing_activity_status():
         disabledsince = 0
+        busysince = int(time.time())
         # We cannot be sleeping with small poll interval for sure.
         # In fact can we be sleeping at all if scraping is enabled?
         if poll_interval >= 64:
@@ -372,8 +380,15 @@ while True:
             state_monitor.wake_up()
             poll_interval = 1
         tosleep = poll_interval
+        processingtime = int(time.time()) - busysince
+        # If we spent too much time in processing, warn here
+        # Reasons might be multiple like say slow DB or slow tesla api
+        if processingtime > 10:
+            logger.info("Too long processing loop: " + str(processingtime) +
+                        " seconds... Tesla server or DB slow?")
         logger.info("Asleep since: " + str(asleep_since) +
                     " Sleeping for " + str(poll_interval) + " seconds..")
+        busysince = 0
     else:
         tosleep = None
 
