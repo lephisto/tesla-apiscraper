@@ -241,6 +241,7 @@ class apiHandler(BaseHTTPRequestHandler):
                     "displayname": a_displayname,
                     "state": is_asleep,
                     "disablescraping": s.server.api_disablescrape,
+                    "carstate": s.server.api_caractive,
                     "disabledsince": s.server.api_disabledsince,
                     "interval": s.server.api_poll_interval
                 }
@@ -289,6 +290,7 @@ def run_server(port, pq, cond):
         httpd.api_disablescrape = disableScrape
         httpd.api_poll_interval = poll_interval
         httpd.api_disabledsince = disabledsince
+        httpd.api_caractive = state_monitor.ongoing_activity_status()
         httpd.handle_request()
 
 if __name__ == "__main__":
