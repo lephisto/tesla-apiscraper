@@ -273,6 +273,9 @@ class apiHandler(BaseHTTPRequestHandler):
         s.end_headers()
 
 class QueuingHTTPServer(HTTPServer):
+    api_disablescrape = None
+    api_poll_interval = None
+    api_disabledsince = None
     def __init__(self, server_address, RequestHandlerClass, pqueue, bind_and_activate=True):
         HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
         self.pqueue = postq
@@ -281,10 +284,10 @@ def run_server(port, pq):
     httpd = QueuingHTTPServer(('0.0.0.0', port), apiHandler, pq)
     while True:
         print("HANDLE: " + threading.current_thread().name)
+        httpd.handle_request()
         httpd.api_disablescrape = disableScrape
         httpd.api_poll_interval = poll_interval
         httpd.api_disabledsince = disabledsince
-        httpd.handle_request()
 
 if __name__ == "__main__":
     # Create Tesla API Interface
@@ -295,6 +298,7 @@ if __name__ == "__main__":
     disableScrape = a_start_disabled
     disabledsince = 0
     mainloopcount = 0
+    last_poll = 0
     # Create HTTP Server Thread
     if (a_enableapi):
         thread = threading.Thread(target=run_server, args=(a_apiport,postq))
@@ -306,6 +310,7 @@ if __name__ == "__main__":
             server.shutdown()
             sys.exit(0)
 
+
 # Main Program Loop. messy..
 while True:
     #Look if there's something from the WEbservers Post Queue
@@ -315,54 +320,58 @@ while True:
         disableScrape = command['value']
         if not disableScrape:
             poll_interval = 1
-    if disableScrape == False or state_monitor.ongoing_activity_status():
-        disabledsince = 0
-        # We cannot be sleeping with small poll interval for sure.
-        # In fact can we be sleeping at all if scraping is enabled?
-        if poll_interval >= 64:
-            state_monitor.refresh_vehicle()
-        # Car woke up
-        if is_asleep == 'asleep' and state_monitor.vehicle['state'] == 'online':
-            poll_interval = 0
-        is_asleep = state_monitor.vehicle['state']
-        a_vin = state_monitor.vehicle['vin']
-        a_displayname = state_monitor.vehicle['display_name']
-        ts = int(time.time()) * 1000000000
-        state_body = [
-            {
-                "measurement": 'vehicle_state',
-                "tags": {
-                    "vin": state_monitor.vehicle['vin'],
-                    "display_name": state_monitor.vehicle['display_name'],
-                    "metric": 'state'
-                },
-                "time": ts,
-                "fields": {
-                    "state": is_asleep
-                }
-            }
-        ]
-        if not a_dryrun:
-            influxclient.write_points(state_body)
-        logger.info("Car State: " + is_asleep +
-                    " Poll Interval: " + str(poll_interval))
-        if is_asleep == 'asleep' and a_allowsleep == 1:
-            logger.info("Car is probably asleep, we let it sleep...")
-            poll_interval = 64
-            asleep_since += poll_interval
-
-        if poll_interval > 0:
-            logger.info("Asleep since: " + str(asleep_since) +
-                        " Sleeping for " + str(poll_interval) + " seconds..")
-            time.sleep(poll_interval - time.time() % poll_interval)
-            if is_asleep != 'asleep':
-                poll_interval = state_monitor.check_states(poll_interval)
-        elif poll_interval < 0:
-            state_monitor.wake_up()
-            poll_interval = 1
-        else:
-            time.sleep(1)
+        pass
     else:
-        disabledsince += 1
-        time.sleep(1)
+        logger.info("Last Poll: " + str(last_poll))
+        if disableScrape == False or state_monitor.ongoing_activity_status():
+            disabledsince = 0
+            # We cannot be sleeping with small poll interval for sure.
+            # In fact can we be sleeping at all if scraping is enabled?
+            if poll_interval >= 64 and is_asleep != 'online':
+                state_monitor.refresh_vehicle()
+            # Car woke up
+            if is_asleep == 'asleep' and state_monitor.vehicle['state'] == 'online':
+                poll_interval = 0
+            is_asleep = state_monitor.vehicle['state']
+            a_vin = state_monitor.vehicle['vin']
+            a_displayname = state_monitor.vehicle['display_name']
+            ts = int(time.time()) * 1000000000
+            state_body = [
+                {
+                    "measurement": 'vehicle_state',
+                    "tags": {
+                        "vin": state_monitor.vehicle['vin'],
+                        "display_name": state_monitor.vehicle['display_name'],
+                        "metric": 'state'
+                    },
+                    "time": ts,
+                    "fields": {
+                        "state": is_asleep
+                    }
+                }
+            ]
+            if not a_dryrun:
+                influxclient.write_points(state_body)
+            logger.info("Car State: " + is_asleep +
+                        " Poll Interval: " + str(poll_interval))
+            if is_asleep == 'asleep' and a_allowsleep == 1:
+                logger.info("Car is probably asleep, we let it sleep...")
+                poll_interval = 64
+                asleep_since += poll_interval
+
+            if poll_interval > 0:
+                logger.info("Asleep since: " + str(asleep_since) +
+                            " Sleeping for " + str(poll_interval) + " seconds..")
+                #time.sleep(poll_interval - time.time() % poll_interval)
+                if is_asleep != 'asleep':
+                    if int(time.time()) >= (last_poll+poll_interval):
+                        poll_interval = state_monitor.check_states(poll_interval)
+                        last_poll = int(time.time())
+            elif poll_interval < 0:
+                state_monitor.wake_up()
+                poll_interval = 1
+            time.sleep(0.5)
+        else:
+            disabledsince += 0.5
+            time.sleep(0.5)
     sys.stdout.flush()
