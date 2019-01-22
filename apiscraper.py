@@ -86,7 +86,8 @@ class StateMonitor(object):
         shift = self.old_values['drive_state'].get('shift_state', '');
         if shift == "R" or shift == "D" or shift == "N":
             return True
-        if self.old_values['charge_state'].get('charging_state', '') == "Charging":
+        if self.old_values['charge_state'].get('charging_state', '') in [
+                "Charging", "Starting"]:
             return True
         return False
 
