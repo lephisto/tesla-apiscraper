@@ -18,7 +18,6 @@
 
 """
 
-import os
 import sys
 import time
 import urllib2
@@ -30,7 +29,6 @@ import Queue
 
 from BaseHTTPServer import HTTPServer
 from BaseHTTPServer import BaseHTTPRequestHandler
-from io import BytesIO
 
 from influxdb import InfluxDBClient
 from pprint import pprint
@@ -44,7 +42,6 @@ postq = Queue.Queue()
 get_api_disablescrape = Queue.Queue()
 get_api_poll_interval = Queue.Queue()
 get_api_disabledsince = Queue.Queue()
-
 
 influxclient = InfluxDBClient(
     a_influxhost, a_influxport, a_influxuser, a_influxpass, a_influxdb)
@@ -63,23 +60,26 @@ def setup_custom_logger(name):
     logger.addHandler(screen_handler)
     return logger
 
+
 logger = setup_custom_logger('apiscraper')
+
 
 class StateMonitor(object):
     """ Monitor all Tesla states."""
+
     def __init__(self, a_tesla_email, a_tesla_passwd):
         self.requests = ("charge_state", "climate_state", "drive_state",
                          "gui_settings", "vehicle_state")
-        self.priority_requests = {1: ("drive_state", ),
-                                  2: ("drive_state", ),
-                                  4: ("charge_state", "drive_state", )}
+        self.priority_requests = {1: ("drive_state",),
+                                  2: ("drive_state",),
+                                  4: ("charge_state", "drive_state",)}
         self.old_values = dict([(r, {}) for r in self.requests])
 
         self.connection = teslajson.Connection(a_tesla_email, a_tesla_passwd)
         self.vehicle = self.connection.vehicles[a_tesla_caridx]
 
     def refresh_vehicle(self):
-        #refreshes the vehicle object
+        # refreshes the vehicle object
         logger.info(">> self.connection.refresh_vehicle()")
         self.connection.refresh_vehicle()
         self.vehicle = self.connection.vehicles[a_tesla_caridx]
@@ -95,8 +95,8 @@ class StateMonitor(object):
 
     def wake_up(self):
         """ mod """
-        global a_vin
-        global a_displayname
+        # global a_vin
+        # global a_displayname
         """ end mod """
         """ Request wake up of car. """
         delay = 1
@@ -124,12 +124,12 @@ class StateMonitor(object):
         global a_ignore
         # Request and process all Tesla states
         any_change = False
-        logger.info(">> Request vehicle data")
+        logger.info(">> self.vehicle.get()")
         r = self.vehicle.get("vehicle_data")
 
         for request in self.requests:
             header_printed = False
-            result=r['response'][request]
+            result = r['response'][request]
             timestamp = result['timestamp']
             if self.old_values[request].get('timestamp', '') == timestamp:
                 break
@@ -140,7 +140,7 @@ class StateMonitor(object):
                     new_value = result[element]
                     if element == "vehicle_name" and not new_value:
                         continue
-                    if ((old_value == '') or ((new_value is not None) and (new_value != old_value))):
+                    if (old_value == '') or ((new_value is not None) and (new_value != old_value)):
                         logger.info("Value Change, SG: " + request + ": Logging..." + element +
                                     ": old value: " + str(old_value) + ", new value: " + str(new_value))
                         if not header_printed:
@@ -149,7 +149,7 @@ class StateMonitor(object):
                                 timestamp = result["timestamp"] / 1000
                             header_printed = True
                             any_change = True
-                        if new_value != None:
+                        if new_value is not None:
                             if element not in a_ignore:
                                 json_body = [
                                     {
@@ -214,16 +214,18 @@ class StateMonitor(object):
             if any_change:  # there have been changes, reduce interval
                 if interval > 1:
                     interval /= 2
-            else:   # there haven't been any changes, increase interval to allow the car to fall asleep
+            else:  # there haven't been any changes, increase interval to allow the car to fall asleep
                 if interval < 2048:
                     interval *= 2
         return interval
 
+
 def lastStateReport(f_vin):
-    query="select time,state from vehicle_state where metric='state' and vin='"+ f_vin +"' order by time desc limit 1"
+    query = "select time,state from vehicle_state where metric='state' and vin='" + f_vin + "' order by time desc limit 1"
     influxresult = influxclient.query(query)
     point = list(influxresult.get_points(measurement='vehicle_state'))
-    return(point[0])
+    return (point[0])
+
 
 # HTTP Thread Handler
 class apiHandler(BaseHTTPRequestHandler):
@@ -235,9 +237,9 @@ class apiHandler(BaseHTTPRequestHandler):
 
     def do_GET(s):
         if not s.server.gqueue_disabledsince.empty():
-            s.server.api_disabledsince=s.server.gqueue_disabledsince.get()
+            s.server.api_disabledsince = s.server.gqueue_disabledsince.get()
         if not s.server.gqueue_poll_interval.empty():
-            s.server.api_poll_interval=s.server.gqueue_poll_interval.get()
+            s.server.api_poll_interval = s.server.gqueue_poll_interval.get()
         if s.path == "/state" and s.headers.get('apikey') == a_apikey:
             s.send_response(200)
             api_response = [
@@ -263,10 +265,8 @@ class apiHandler(BaseHTTPRequestHandler):
         s.end_headers()
         s.wfile.write(json.dumps(api_response, indent=4))
 
-    #todo
+    # todo
     def do_POST(s):
-        pprint(s.headers)
-        print("DEBUG POST: " + s.path + "API KEY:" + s.headers.get('apikey'))
         if s.path == "/switch" and s.headers.get('apikey') == a_apikey:
             content_length = int(s.headers['Content-Length'])
             body = s.rfile.read(content_length)
@@ -274,23 +274,26 @@ class apiHandler(BaseHTTPRequestHandler):
             if command['command'] != None:
                 s.send_response(200)
                 s.server.api_disablescrape = command['value']
-                s.server.pqueue.put(body)   #send to mainthread queue
+                s.server.pqueue.put(body)  # send to mainthread queue
             else:
                 s.send_response(401)
         else:
             s.send_response(400)
         s.end_headers()
 
+
 class QueuingHTTPServer(HTTPServer):
     api_disablescrape = None
     api_poll_interval = None
     api_disabledsince = None
+
     def __init__(self, server_address, RequestHandlerClass, pqueue, bind_and_activate=True):
         HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
         self.pqueue = postq
         self.gqueue_disablescrape = get_api_disablescrape
         self.gqueue_poll_interval = get_api_poll_interval
         self.gqueue_disabledsince = get_api_disabledsince
+
 
 def run_server(port, pq):
     httpd = QueuingHTTPServer(('0.0.0.0', port), apiHandler, pq)
@@ -301,19 +304,20 @@ def run_server(port, pq):
         print("HANDLE: " + threading.current_thread().name)
         httpd.handle_request()
 
+
 if __name__ == "__main__":
     # Create Tesla API Interface
     state_monitor = StateMonitor(a_tesla_email, a_tesla_passwd)
-    poll_interval = 1   # Set to -1 to wakeup the Car on Scraper start
+    # Initialize Variables
+    poll_interval = 1  # Set to -1 to wakeup the Car on Scraper start
     asleep_since = 0
     is_asleep = ''
     disableScrape = a_start_disabled
     disabledsince = 0
-    mainloopcount = 0
     last_poll = 0
     # Create HTTP Server Thread
-    if (a_enableapi):
-        thread = threading.Thread(target=run_server, args=(a_apiport,postq))
+    if a_enableapi:
+        thread = threading.Thread(target=run_server, args=(a_apiport, postq))
         thread.daemon = True
         try:
             thread.start()
@@ -322,10 +326,9 @@ if __name__ == "__main__":
             server.shutdown()
             sys.exit(0)
 
-
 # Main Program Loop. messy..
 while True:
-    #Look if there's something from the WEbservers Post Queue
+    # Look if there's something from the WEbservers Post Queue
     if not postq.empty():
         command = json.loads(postq.get())
         pprint(command)
@@ -337,13 +340,15 @@ while True:
     else:
         get_api_poll_interval.queue.clear()
         get_api_poll_interval.put(poll_interval)
-        logger.info("Last Poll: " + str(last_poll))
         if disableScrape == False or state_monitor.ongoing_activity_status():
             disabledsince = 0
             # We cannot be sleeping with small poll interval for sure.
             # In fact can we be sleeping at all if scraping is enabled?
             if poll_interval >= 64 and is_asleep != 'online':
-                state_monitor.refresh_vehicle()
+                if int(time.time()) >= (last_poll + poll_interval):
+                    state_monitor.refresh_vehicle()
+                    logger.info("Car is probably asleep, we let it sleep...")
+                    last_poll = int(time.time())
             # Car woke up
             if is_asleep == 'asleep' and state_monitor.vehicle['state'] == 'online':
                 poll_interval = 0
@@ -367,19 +372,14 @@ while True:
             ]
             if not a_dryrun:
                 influxclient.write_points(state_body)
-            logger.info("Car State: " + is_asleep +
-                        " Poll Interval: " + str(poll_interval))
             if is_asleep == 'asleep' and a_allowsleep == 1:
-                logger.info("Car is probably asleep, we let it sleep...")
+                # logger.info("Car is probably asleep, we let it sleep...")
                 poll_interval = 64
                 asleep_since += poll_interval
 
             if poll_interval > 0:
-                logger.info("Asleep since: " + str(asleep_since) +
-                            " Sleeping for " + str(poll_interval) + " seconds..")
-                #time.sleep(poll_interval - time.time() % poll_interval)
                 if is_asleep != 'asleep':
-                    if int(time.time()) >= (last_poll+poll_interval):
+                    if int(time.time()) >= (last_poll + poll_interval):
                         poll_interval = state_monitor.check_states(poll_interval)
                         last_poll = int(time.time())
             elif poll_interval < 0:
