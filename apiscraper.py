@@ -41,6 +41,7 @@ a_displayname = ""
 a_ignore = ["media_state", "software_update", "speed_limit_mode"]
 
 postq = Queue.Queue()
+http_condition = threading.Condition()
 
 influxclient = InfluxDBClient(
     a_influxhost, a_influxport, a_influxuser, a_influxpass, a_influxdb)
@@ -265,7 +266,10 @@ class apiHandler(BaseHTTPRequestHandler):
             command = json.loads(body)
             if command['command'] != None:
                 s.send_response(200)
+                s.server.condition.acquire()
                 s.server.pqueue.put(body)
+                s.server.condition.notify()
+                s.server.condition.release()
             else:
                 s.send_response(401)
         else:
@@ -273,12 +277,13 @@ class apiHandler(BaseHTTPRequestHandler):
         s.end_headers()
 
 class QueuingHTTPServer(HTTPServer):
-    def __init__(self, server_address, RequestHandlerClass, pqueue, bind_and_activate=True):
+    def __init__(self, server_address, RequestHandlerClass, pqueue, cond, bind_and_activate=True):
         HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
         self.pqueue = postq
+        self.condition = cond
 
-def run_server(port, pq):
-    httpd = QueuingHTTPServer(('0.0.0.0', port), apiHandler, pq)
+def run_server(port, pq, cond):
+    httpd = QueuingHTTPServer(('0.0.0.0', port), apiHandler, pq, cond)
     while True:
         print("HANDLE: " + threading.current_thread().name)
         httpd.api_disablescrape = disableScrape
@@ -297,7 +302,7 @@ if __name__ == "__main__":
     mainloopcount = 0
     # Create HTTP Server Thread
     if (a_enableapi):
-        thread = threading.Thread(target=run_server, args=(a_apiport,postq))
+        thread = threading.Thread(target=run_server, args=(a_apiport, postq, http_condition))
         thread.daemon = True
         try:
             thread.start()
@@ -309,12 +314,15 @@ if __name__ == "__main__":
 # Main Program Loop. messy..
 while True:
     #Look if there's something from the WEbservers Post Queue
-    if not postq.empty():
+    while not postq.empty():
         command = json.loads(postq.get())
         pprint(command)
         disableScrape = command['value']
         if not disableScrape:
             poll_interval = 1
+        else:
+            disabledsince = time.time()
+
     if disableScrape == False or state_monitor.ongoing_activity_status():
         disabledsince = 0
         # We cannot be sleeping with small poll interval for sure.
@@ -324,6 +332,11 @@ while True:
         # Car woke up
         if is_asleep == 'asleep' and state_monitor.vehicle['state'] == 'online':
             poll_interval = 0
+            asleep_since = 0
+
+        if state_monitor.vehicle['state'] == 'asleep' and is_asleep == 'online':
+            asleep_since = time.time()
+
         is_asleep = state_monitor.vehicle['state']
         a_vin = state_monitor.vehicle['vin']
         a_displayname = state_monitor.vehicle['display_name']
@@ -349,20 +362,38 @@ while True:
         if is_asleep == 'asleep' and a_allowsleep == 1:
             logger.info("Car is probably asleep, we let it sleep...")
             poll_interval = 64
-            asleep_since += poll_interval
 
-        if poll_interval > 0:
-            logger.info("Asleep since: " + str(asleep_since) +
-                        " Sleeping for " + str(poll_interval) + " seconds..")
-            time.sleep(poll_interval - time.time() % poll_interval)
+        if poll_interval >= 0:
             if is_asleep != 'asleep':
                 poll_interval = state_monitor.check_states(poll_interval)
         elif poll_interval < 0:
             state_monitor.wake_up()
             poll_interval = 1
-        else:
-            time.sleep(1)
+        tosleep = poll_interval
+        logger.info("Asleep since: " + str(asleep_since) +
+                    " Sleeping for " + str(poll_interval) + " seconds..")
     else:
-        disabledsince += 1
-        time.sleep(1)
+        tosleep = None
+
+    #Look if there's something from the WEbservers Post Queue
+    http_condition.acquire()
+    if not postq.empty():
+        # Need to turn around and do another round of processing
+        # right away.
+        http_condition.release()
+        continue
+
+    # Using tosleep value ensures we don't miss the active car state here
+    # even if disableScrape changed to true. Do not directly check it
+    # here without checking for state_monitor.ongoing_activity_status()
+    http_condition.wait(tosleep)
+    http_condition.release()
+    # A wakeup here due to http request coming might cause a long sleep
+    # to be interrupted early on and if no activity happened in the car,
+    # double it, that's probably an ok condition that we should not care
+    # too much about since it's guaranteed to be a "stop scraping" case
+    # anyway ("start scraping" would reset poll interval to 1 and we'll
+    # start quick polling anyway)
+    # Same thing applies to the continue case above
+
     sys.stdout.flush()
