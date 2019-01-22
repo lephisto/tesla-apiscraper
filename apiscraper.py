@@ -41,6 +41,10 @@ a_displayname = ""
 a_ignore = ["media_state", "software_update", "speed_limit_mode"]
 
 postq = Queue.Queue()
+get_api_disablescrape = Queue.Queue()
+get_api_poll_interval = Queue.Queue()
+get_api_disabledsince = Queue.Queue()
+
 
 influxclient = InfluxDBClient(
     a_influxhost, a_influxport, a_influxuser, a_influxpass, a_influxdb)
@@ -230,6 +234,10 @@ class apiHandler(BaseHTTPRequestHandler):
         s.end_headers()
 
     def do_GET(s):
+        if not s.server.gqueue_disabledsince.empty():
+            s.server.api_disabledsince=s.server.gqueue_disabledsince.get()
+        if not s.server.gqueue_poll_interval.empty():
+            s.server.api_poll_interval=s.server.gqueue_poll_interval.get()
         if s.path == "/state" and s.headers.get('apikey') == a_apikey:
             s.send_response(200)
             api_response = [
@@ -265,7 +273,8 @@ class apiHandler(BaseHTTPRequestHandler):
             command = json.loads(body)
             if command['command'] != None:
                 s.send_response(200)
-                s.server.pqueue.put(body)
+                s.server.api_disablescrape = command['value']
+                s.server.pqueue.put(body)   #send to mainthread queue
             else:
                 s.send_response(401)
         else:
@@ -279,15 +288,18 @@ class QueuingHTTPServer(HTTPServer):
     def __init__(self, server_address, RequestHandlerClass, pqueue, bind_and_activate=True):
         HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
         self.pqueue = postq
+        self.gqueue_disablescrape = get_api_disablescrape
+        self.gqueue_poll_interval = get_api_poll_interval
+        self.gqueue_disabledsince = get_api_disabledsince
 
 def run_server(port, pq):
     httpd = QueuingHTTPServer(('0.0.0.0', port), apiHandler, pq)
+    httpd.api_disablescrape = disableScrape
+    httpd.api_poll_interval = poll_interval
+    httpd.api_disabledsince = disabledsince
     while True:
         print("HANDLE: " + threading.current_thread().name)
         httpd.handle_request()
-        httpd.api_disablescrape = disableScrape
-        httpd.api_poll_interval = poll_interval
-        httpd.api_disabledsince = disabledsince
 
 if __name__ == "__main__":
     # Create Tesla API Interface
@@ -321,7 +333,10 @@ while True:
         if not disableScrape:
             poll_interval = 1
         pass
+        get_api_disablescrape.put(disableScrape)
     else:
+        get_api_poll_interval.queue.clear()
+        get_api_poll_interval.put(poll_interval)
         logger.info("Last Poll: " + str(last_poll))
         if disableScrape == False or state_monitor.ongoing_activity_status():
             disabledsince = 0
@@ -370,8 +385,10 @@ while True:
             elif poll_interval < 0:
                 state_monitor.wake_up()
                 poll_interval = 1
-            time.sleep(0.5)
+            time.sleep(1)
         else:
-            disabledsince += 0.5
-            time.sleep(0.5)
+            disabledsince += 1
+            get_api_disabledsince.queue.clear()
+            get_api_disabledsince.put(disabledsince)
+            time.sleep(1)
     sys.stdout.flush()
