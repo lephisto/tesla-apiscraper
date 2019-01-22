@@ -91,6 +91,13 @@ class StateMonitor(object):
             return True
         if self.old_values['climate_state'].get('is_climate_on', False):
             return True
+        # When it's about time to start charging, we want to perform
+        # several polling attempts to ensure we catch it starting even
+        # when scraping is otherwise disabled
+        if self.old_values['charge_state'].get('scheduled_charging_pending', False):
+            sched_time = self.old_values['charge_state'].get('scheduled_charging_start_time', 0)
+            if abs(sched_time - int(time.time())) <= 2:
+                return True
         return False
 
     def wake_up(self):
@@ -397,7 +404,17 @@ while True:
                     " Sleeping for " + str(poll_interval) + " seconds..")
         busysince = 0
     else:
-        tosleep = None
+        # If we have scheduled charging, lets wake up just in time
+        # to catch that activity.
+        if state_monitor.old_values['charge_state'].get('scheduled_charging_pending', False):
+            tosleep = state_monitor.old_values['charge_state'].get('scheduled_charging_start_time', 0) - int(time.time())
+            # This really should not happen
+            if tosleep <= 0:
+                tosleep = None
+            else:
+                logger.info("Going to sleep " + str(tosleep) + " seconds until a scheduled charge")
+        else:
+            tosleep = None
 
     #Look if there's something from the WEbservers Post Queue
     http_condition.acquire()
