@@ -319,6 +319,8 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             server.shutdown()
             sys.exit(0)
+    elif disableScrape:
+        sys.exit("Configuration error: Scraping disabled and no api configured to enable. Bailing out")
 
 # Main Program Loop. messy..
 while True:
