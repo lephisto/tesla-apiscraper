@@ -43,6 +43,14 @@ a_ignore = ["media_state", "software_update", "speed_limit_mode"]
 postq = Queue.Queue()
 http_condition = threading.Condition()
 
+poll_interval = 1   # Set to -1 to wakeup the Car on Scraper start
+asleep_since = 0
+is_asleep = ''
+disableScrape = a_start_disabled
+disabledsince = 0
+busysince = 0
+caractive_state = False
+
 influxclient = InfluxDBClient(
     a_influxhost, a_influxport, a_influxuser, a_influxpass, a_influxdb)
 
@@ -243,8 +251,9 @@ class apiHandler(BaseHTTPRequestHandler):
     def do_GET(s):
         if s.path == "/state" and s.headers.get('apikey') == a_apikey:
             s.send_response(200)
-            if s.server.api_busysince:
-                processingtime = int(time.time()) - s.server.api_busysince
+            busysince_copy = busysince
+            if busysince_copy:
+                processingtime = int(time.time()) - busysince_copy
             else:
                 processingtime = 0
             api_response = [
@@ -254,10 +263,10 @@ class apiHandler(BaseHTTPRequestHandler):
                     "apikey": a_apikey,
                     "displayname": a_displayname,
                     "state": is_asleep,
-                    "disablescraping": s.server.api_disablescrape,
-                    "carstate": s.server.api_caractive,
-                    "disabledsince": s.server.api_disabledsince,
-                    "interval": s.server.api_poll_interval,
+                    "disablescraping": disableScrape,
+                    "carstate": caractive_state,
+                    "disabledsince": disabledsince,
+                    "interval": poll_interval,
                     "busy": processingtime
                 }
             ]
@@ -302,23 +311,14 @@ def run_server(port, pq, cond):
     httpd = QueuingHTTPServer(('0.0.0.0', port), apiHandler, pq, cond)
     while True:
         print("HANDLE: " + threading.current_thread().name)
-        httpd.api_disablescrape = disableScrape
-        httpd.api_poll_interval = poll_interval
-        httpd.api_disabledsince = disabledsince
-        httpd.api_busysince = busysince
         httpd.api_caractive = state_monitor.ongoing_activity_status()
         httpd.handle_request()
 
 if __name__ == "__main__":
     # Create Tesla API Interface
     state_monitor = StateMonitor(a_tesla_email, a_tesla_passwd)
-    poll_interval = 1   # Set to -1 to wakeup the Car on Scraper start
-    asleep_since = 0
-    is_asleep = ''
-    disableScrape = a_start_disabled
-    disabledsince = 0
     mainloopcount = 0
-    busysince = 0
+
     # Create HTTP Server Thread
     if (a_enableapi):
         thread = threading.Thread(target=run_server, args=(a_apiport, postq, http_condition))
@@ -346,7 +346,10 @@ while True:
             else:
                 disabledsince = time.time()
 
-    if disableScrape == False or state_monitor.ongoing_activity_status():
+    # We need to store this state in this global variable to ensure
+    # HTTP thread is able to see it in real time as well.
+    caractive_state = state_monitor.ongoing_activity_status()
+    if disableScrape == False or caractive_state:
         disabledsince = 0
         busysince = int(time.time())
         # We cannot be sleeping with small poll interval for sure.
