@@ -324,13 +324,15 @@ if __name__ == "__main__":
 while True:
     #Look if there's something from the WEbservers Post Queue
     while not postq.empty():
-        command = json.loads(postq.get())
-        pprint(command)
-        disableScrape = command['value']
-        if not disableScrape:
-            poll_interval = 1
-        else:
-            disabledsince = time.time()
+        req = json.loads(postq.get())
+        pprint(req)
+        command = req['command']
+        if command == "scrape":
+            disableScrape = req['value']
+            if not disableScrape:
+                poll_interval = 1
+            else:
+                disabledsince = time.time()
 
     if disableScrape == False or state_monitor.ongoing_activity_status():
         disabledsince = 0
