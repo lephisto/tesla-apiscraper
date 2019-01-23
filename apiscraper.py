@@ -97,6 +97,11 @@ class StateMonitor(object):
         if self.old_values['charge_state'].get('charging_state', '') in [
                 "Charging", "Starting"]:
             return True
+        # If we just completed the charging, need to wait for voltage to
+        # go down to zero too to avoid stale value in the DB.
+        if self.old_values['charge_state'].get('charging_state', '') == "Complete" and self.old_values['charge_state'].get('charger_voltage', 0) > 0:
+            return True
+
         if self.old_values['climate_state'].get('is_climate_on', False):
             return True
         # When it's about time to start charging, we want to perform
