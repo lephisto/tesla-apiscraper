@@ -5,6 +5,14 @@ a_tesla_caridx = 0                      # Index of the Car in myTesla Account in
 a_allowsleep = 1                        # Allow Car to fall asleep / don't wake up if car is asleep on Scraper start
 a_maximumsleep = 1024                   # Wake up every X seconds, if car is asleep
 
+# Scraper API Config (you need that for using the android App)
+a_enableapi = True
+a_apikey = 'somerandomnumberwithenoughdigitsthatcantbeguessedeasily'
+a_apiport = 8023
+a_start_disabled = False		# Scrapper state on startup. This could
+					# be changed with the app if the
+					# a_enableapi is True
+
 # Logging
 a_logfile = 'apiscraper.log'            # APIScraper Logfile
 
@@ -14,3 +22,5 @@ a_influxport = 8086                     #InfluxDB Port
 a_influxuser = 'tesla'                  #InfluxDB Username
 a_influxpass = '<influxdbpassword>'     #InfluxDB Password
 a_influxdb = 'tesla'                    #InfluxDB Datebasename
+
+a_dryrun = False  #Just for debugging purposes

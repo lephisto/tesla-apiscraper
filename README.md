@@ -1,6 +1,8 @@
 # tesla-apiscraper
 Selfhosted API Scraper for pulling Vehicle Telemetry from the Tesla Owner API into an InfluxDB visualisation on Grafana Dashboards.
 
+_Current Release: v2019.1_
+
 **Putting an end to __handing out the Key__ for your 100+ Grand Car to a third party you don't know.**
 
 This can be hosted on any System that's capable of running InfluxDB, Grafana and Python. In this short guide I assume you're using a Debian'ish OS. It can run on a dedicated Linuxserver out there on the Internets or on your home Raspberry Pi.
@@ -75,6 +77,13 @@ There you can change $rangeunit "km" to "mi" and $rangefactor 1.60934 to 1.0 and
 git clone https://github.com/lephisto/tesla-apiscraper
 ```
 
+- Pick a release
+
+eg:
+```
+git checkout v2019.1
+```
+
 - Get Python InfluxDB Module
 
 ```
@@ -89,6 +98,7 @@ vim config.py
 ```
 
 Set Tesla and Influxdb Credentials there.
+
 
 Afterwards start the Scraping:
 
@@ -117,6 +127,17 @@ To run it, use:
 ```
 docker run -p 3000:3000 -e "TESLA_USERNAME=<your tesla email>" -e "TESLA_PASSWORD=<your tesla password>" tesla-apiscraper:latest
 ```
+## Using the API for the Scraper App for android
+
+There's a little Android App, that can help you letting your car sleep and immidiately turn on scraping when needed. You need to uncomment and configure the follwing Values for it in config.py:
+
+```
+a_enableapi = True
+a_apikey = 'somerandomnumberwithenoughdigitsthatcantbeguessedeasily'
+a_apiport = 8023
+```
+
+I strongly recommend to put all this behind a reverse Proxy, probably with HTTP Basic authentication in addition to the API Key.
 
 ## Known Limitations and issues
 
