@@ -41,6 +41,15 @@ a_displayname = ""
 a_ignore = ["media_state", "software_update", "speed_limit_mode"]
 
 postq = Queue.Queue()
+http_condition = threading.Condition()
+
+poll_interval = 1   # Set to -1 to wakeup the Car on Scraper start
+asleep_since = 0
+is_asleep = ''
+disableScrape = a_start_disabled
+disabledsince = 0
+busysince = 0
+caractive_state = False
 
 influxclient = InfluxDBClient(
     a_influxhost, a_influxport, a_influxuser, a_influxpass, a_influxdb)
@@ -85,8 +94,18 @@ class StateMonitor(object):
         shift = self.old_values['drive_state'].get('shift_state', '');
         if shift == "R" or shift == "D" or shift == "N":
             return True
-        if self.old_values['charge_state'].get('charging_state', '') == "Charging":
+        if self.old_values['charge_state'].get('charging_state', '') in [
+                "Charging", "Starting"]:
             return True
+        if self.old_values['climate_state'].get('is_climate_on', False):
+            return True
+        # When it's about time to start charging, we want to perform
+        # several polling attempts to ensure we catch it starting even
+        # when scraping is otherwise disabled
+        if self.old_values['charge_state'].get('scheduled_charging_pending', False):
+            sched_time = self.old_values['charge_state'].get('scheduled_charging_start_time', 0)
+            if abs(sched_time - int(time.time())) <= 2:
+                return True
         return False
 
     def wake_up(self):
@@ -232,6 +251,11 @@ class apiHandler(BaseHTTPRequestHandler):
     def do_GET(s):
         if s.path == "/state" and s.headers.get('apikey') == a_apikey:
             s.send_response(200)
+            busysince_copy = busysince
+            if busysince_copy:
+                processingtime = int(time.time()) - busysince_copy
+            else:
+                processingtime = 0
             api_response = [
                 {
                     "result": "ok",
@@ -239,9 +263,11 @@ class apiHandler(BaseHTTPRequestHandler):
                     "apikey": a_apikey,
                     "displayname": a_displayname,
                     "state": is_asleep,
-                    "disablescraping": s.server.api_disablescrape,
-                    "disabledsince": s.server.api_disabledsince,
-                    "interval": s.server.api_poll_interval
+                    "disablescraping": disableScrape,
+                    "carstate": caractive_state,
+                    "disabledsince": disabledsince,
+                    "interval": poll_interval,
+                    "busy": processingtime
                 }
             ]
         else:
@@ -265,7 +291,10 @@ class apiHandler(BaseHTTPRequestHandler):
             command = json.loads(body)
             if command['command'] != None:
                 s.send_response(200)
+                s.server.condition.acquire()
                 s.server.pqueue.put(body)
+                s.server.condition.notify()
+                s.server.condition.release()
             else:
                 s.send_response(401)
         else:
@@ -273,31 +302,26 @@ class apiHandler(BaseHTTPRequestHandler):
         s.end_headers()
 
 class QueuingHTTPServer(HTTPServer):
-    def __init__(self, server_address, RequestHandlerClass, pqueue, bind_and_activate=True):
+    def __init__(self, server_address, RequestHandlerClass, pqueue, cond, bind_and_activate=True):
         HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
         self.pqueue = postq
+        self.condition = cond
 
-def run_server(port, pq):
-    httpd = QueuingHTTPServer(('0.0.0.0', port), apiHandler, pq)
+def run_server(port, pq, cond):
+    httpd = QueuingHTTPServer(('0.0.0.0', port), apiHandler, pq, cond)
     while True:
         print("HANDLE: " + threading.current_thread().name)
-        httpd.api_disablescrape = disableScrape
-        httpd.api_poll_interval = poll_interval
-        httpd.api_disabledsince = disabledsince
+        httpd.api_caractive = state_monitor.ongoing_activity_status()
         httpd.handle_request()
 
 if __name__ == "__main__":
     # Create Tesla API Interface
     state_monitor = StateMonitor(a_tesla_email, a_tesla_passwd)
-    poll_interval = 1   # Set to -1 to wakeup the Car on Scraper start
-    asleep_since = 0
-    is_asleep = ''
-    disableScrape = a_start_disabled
-    disabledsince = 0
     mainloopcount = 0
+
     # Create HTTP Server Thread
     if (a_enableapi):
-        thread = threading.Thread(target=run_server, args=(a_apiport,postq))
+        thread = threading.Thread(target=run_server, args=(a_apiport, postq, http_condition))
         thread.daemon = True
         try:
             thread.start()
@@ -305,18 +329,29 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             server.shutdown()
             sys.exit(0)
+    elif disableScrape:
+        sys.exit("Configuration error: Scraping disabled and no api configured to enable. Bailing out")
 
 # Main Program Loop. messy..
 while True:
     #Look if there's something from the WEbservers Post Queue
-    if not postq.empty():
-        command = json.loads(postq.get())
-        pprint(command)
-        disableScrape = command['value']
-        if not disableScrape:
-            poll_interval = 1
-    if disableScrape == False or state_monitor.ongoing_activity_status():
+    while not postq.empty():
+        req = json.loads(postq.get())
+        pprint(req)
+        command = req['command']
+        if command == "scrape":
+            disableScrape = req['value']
+            if not disableScrape:
+                poll_interval = 1
+            else:
+                disabledsince = time.time()
+
+    # We need to store this state in this global variable to ensure
+    # HTTP thread is able to see it in real time as well.
+    caractive_state = state_monitor.ongoing_activity_status()
+    if disableScrape == False or caractive_state:
         disabledsince = 0
+        busysince = int(time.time())
         # We cannot be sleeping with small poll interval for sure.
         # In fact can we be sleeping at all if scraping is enabled?
         if poll_interval >= 64:
@@ -324,6 +359,11 @@ while True:
         # Car woke up
         if is_asleep == 'asleep' and state_monitor.vehicle['state'] == 'online':
             poll_interval = 0
+            asleep_since = 0
+
+        if state_monitor.vehicle['state'] == 'asleep' and is_asleep == 'online':
+            asleep_since = time.time()
+
         is_asleep = state_monitor.vehicle['state']
         a_vin = state_monitor.vehicle['vin']
         a_displayname = state_monitor.vehicle['display_name']
@@ -349,20 +389,55 @@ while True:
         if is_asleep == 'asleep' and a_allowsleep == 1:
             logger.info("Car is probably asleep, we let it sleep...")
             poll_interval = 64
-            asleep_since += poll_interval
 
-        if poll_interval > 0:
-            logger.info("Asleep since: " + str(asleep_since) +
-                        " Sleeping for " + str(poll_interval) + " seconds..")
-            time.sleep(poll_interval - time.time() % poll_interval)
+        if poll_interval >= 0:
             if is_asleep != 'asleep':
                 poll_interval = state_monitor.check_states(poll_interval)
         elif poll_interval < 0:
             state_monitor.wake_up()
             poll_interval = 1
-        else:
-            time.sleep(1)
+        tosleep = poll_interval
+        processingtime = int(time.time()) - busysince
+        # If we spent too much time in processing, warn here
+        # Reasons might be multiple like say slow DB or slow tesla api
+        if processingtime > 10:
+            logger.info("Too long processing loop: " + str(processingtime) +
+                        " seconds... Tesla server or DB slow?")
+        logger.info("Asleep since: " + str(asleep_since) +
+                    " Sleeping for " + str(poll_interval) + " seconds..")
+        busysince = 0
     else:
-        disabledsince += 1
-        time.sleep(1)
+        # If we have scheduled charging, lets wake up just in time
+        # to catch that activity.
+        if state_monitor.old_values['charge_state'].get('scheduled_charging_pending', False):
+            tosleep = state_monitor.old_values['charge_state'].get('scheduled_charging_start_time', 0) - int(time.time())
+            # This really should not happen
+            if tosleep <= 0:
+                tosleep = None
+            else:
+                logger.info("Going to sleep " + str(tosleep) + " seconds until a scheduled charge")
+        else:
+            tosleep = None
+
+    #Look if there's something from the WEbservers Post Queue
+    http_condition.acquire()
+    if not postq.empty():
+        # Need to turn around and do another round of processing
+        # right away.
+        http_condition.release()
+        continue
+
+    # Using tosleep value ensures we don't miss the active car state here
+    # even if disableScrape changed to true. Do not directly check it
+    # here without checking for state_monitor.ongoing_activity_status()
+    http_condition.wait(tosleep)
+    http_condition.release()
+    # A wakeup here due to http request coming might cause a long sleep
+    # to be interrupted early on and if no activity happened in the car,
+    # double it, that's probably an ok condition that we should not care
+    # too much about since it's guaranteed to be a "stop scraping" case
+    # anyway ("start scraping" would reset poll interval to 1 and we'll
+    # start quick polling anyway)
+    # Same thing applies to the continue case above
+
     sys.stdout.flush()
