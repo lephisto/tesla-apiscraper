@@ -311,7 +311,6 @@ def run_server(port, pq, cond):
     httpd = QueuingHTTPServer(('0.0.0.0', port), apiHandler, pq, cond)
     while True:
         print("HANDLE: " + threading.current_thread().name)
-        httpd.api_caractive = state_monitor.ongoing_activity_status()
         httpd.handle_request()
 
 if __name__ == "__main__":
