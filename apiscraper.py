@@ -92,11 +92,16 @@ class StateMonitor(object):
     def ongoing_activity_status(self):
         """ True if the car is not in park, or is actively charging ... """
         shift = self.old_values['drive_state'].get('shift_state', '');
-        if shift == "R" or shift == "D" or shift == "N":
+        if shift == "R" or shift == "D" or shift == "N" or self.old_values['drive_state'].get('speed', 0) > 0:
             return True
         if self.old_values['charge_state'].get('charging_state', '') in [
                 "Charging", "Starting"]:
             return True
+        # If we just completed the charging, need to wait for voltage to
+        # go down to zero too to avoid stale value in the DB.
+        if self.old_values['charge_state'].get('charging_state', '') == "Complete" and self.old_values['charge_state'].get('charger_voltage', 0) > 0:
+            return True
+
         if self.old_values['climate_state'].get('is_climate_on', False):
             return True
         # When it's about time to start charging, we want to perform
@@ -311,7 +316,6 @@ def run_server(port, pq, cond):
     httpd = QueuingHTTPServer(('0.0.0.0', port), apiHandler, pq, cond)
     while True:
         print("HANDLE: " + threading.current_thread().name)
-        httpd.api_caractive = state_monitor.ongoing_activity_status()
         httpd.handle_request()
 
 if __name__ == "__main__":
