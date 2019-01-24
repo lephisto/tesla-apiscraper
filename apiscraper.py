@@ -174,16 +174,6 @@ class StateMonitor(object):
                         a_lat = new_value;
                     if element == "native_longitude":
                         a_long = new_value;
-                    if a_lat is not None and a_long is not None and a_resolve_elevation:
-                        # Fire and forget Elevation retrieval..
-                        print("starting thread elevator: " + str(a_lat) + "/" + str(a_long) + "/" + str(timestamp))
-                        elevator = threading.Thread(target=elevationtoinflux, args=(a_lat,a_long, a_vin, a_displayname, timestamp, influxclient, a_dryrun))
-                        # elevator.daemon = True
-                        elevator.setName("elevator")
-                        if not elevator.is_alive():
-                            elevator.start()
-                        a_lat = None
-                        a_long = None
                     if (old_value == '') or ((new_value is not None) and (new_value != old_value)):
                         logger.info("Value Change, SG: " + request + ": Logging..." + element +
                                     ": old value: " + str(old_value) + ", new value: " + str(new_value))
@@ -212,6 +202,17 @@ class StateMonitor(object):
                                 if not a_dryrun:
                                     influxclient.write_points(json_body)
                         self.old_values[request][element] = new_value
+                if a_lat is not None and a_long is not None and a_resolve_elevation:
+                    # Fire and forget Elevation retrieval..
+                    print("starting thread elevator: " + str(a_lat) + "/" + str(a_long) + "/" + str(timestamp))
+                    elevator = threading.Thread(target=elevationtoinflux,
+                                                args=(a_lat, a_long, a_vin, a_displayname, timestamp, influxclient, a_dryrun))
+                    # elevator.daemon = True
+                    elevator.setName("elevator")
+                    if not elevator.is_alive():
+                        elevator.start()
+                    a_lat = None
+                    a_long = None
         return any_change
 
     def check_states(self, interval):
