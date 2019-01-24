@@ -176,8 +176,10 @@ class StateMonitor(object):
                         a_long = new_value;
                     if a_lat is not None and a_long is not None and a_resolve_elevation:
                         # Fire and forget Elevation retrieval..
+                        print("starting thread elevator: " + str(a_lat) + "/" + str(a_long) + "/" + str(timestamp))
                         elevator = threading.Thread(target=elevationtoinflux, args=(a_lat,a_long, a_vin, a_displayname, timestamp, influxclient, a_dryrun))
-                        elevator.daemon = True
+                        # elevator.daemon = True
+                        elevator.setName("elevator")
                         if not elevator.is_alive():
                             elevator.start()
                         a_lat = None

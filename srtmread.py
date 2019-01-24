@@ -11,6 +11,7 @@ HGT_EURASIA = 'https://dds.cr.usgs.gov/srtm/version1/Eurasia/'
 
 
 def elevationtoinflux(lat, lon, vin, displayname, ts, ifclient, dryrun):
+    print("elevationtoinflux vars: " + str(ts))
     hgt_file = get_file_name(lat, lon)
     if hgt_file:
         elevation = read_elevation_from_file(hgt_file, lon, lat)
@@ -21,7 +22,7 @@ def elevationtoinflux(lat, lon, vin, displayname, ts, ifclient, dryrun):
                     "vin": vin,
                     "display_name": displayname,
                 },
-                "time": ts * 1000000000,
+                "time": ts * 1000000,
                 "fields": {
                     "elevation": elevation
                 }
@@ -29,7 +30,10 @@ def elevationtoinflux(lat, lon, vin, displayname, ts, ifclient, dryrun):
         ]
         if not dryrun:
             ifclient.write_points(elev_json_body)
+            elev_json_body
         print("HANDLE: " + threading.current_thread().name + " elevation: " + str(elevation))
+        sys.exit()
+
     return True
 
 
