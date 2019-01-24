@@ -74,7 +74,7 @@ def get_file_name(lat, lon):
                 zip_ = zipfile.ZipFile(hgt_file_path + '.zip')
                 zip_.extractall(HGTDIR)
                 zip_.close()
-                # os.remove(hgt_file_path + '.zip.downloading')
+                os.remove(hgt_file_path + '.zip.downloading')
                 return hgt_file_path
             except urllib2.HTTPError as e:
                 print("HTTP Error:", e.code, e.url)
