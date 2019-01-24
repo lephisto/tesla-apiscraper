@@ -5,3 +5,5 @@ master.zip
 *.pyc
 apiscraper.log
 .idea
+hgt/*.zip
+hgt/*.hgt

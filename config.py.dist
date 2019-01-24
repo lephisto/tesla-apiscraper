@@ -12,6 +12,7 @@ a_apiport = 8023
 a_start_disabled = False		# Scrapper state on startup. This could
 					# be changed with the app if the
 					# a_enableapi is True
+a_resolve_elevation = True      # Resolve Coordinates to Elevation. Will Autodownload Elevation data from https://dds.cr.usgs.gov
 
 # Logging
 a_logfile = 'apiscraper.log'            # APIScraper Logfile
