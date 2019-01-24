@@ -94,7 +94,7 @@ pip install influxdb
 
 ```
 apt install gdal-bin
-pip install elevation
+pip install elevation pathlib 
 eio selfcheck
 ```
 ... should Produce:
