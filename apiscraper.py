@@ -346,7 +346,10 @@ def run_server(port, pq, cond):
 
 if __name__ == "__main__":
     # Create Tesla API Interface
-    state_monitor = StateMonitor(a_tesla_email, a_tesla_passwd)
+    try:
+        state_monitor = StateMonitor(a_tesla_email, a_tesla_passwd)
+    except:
+        sys.exit("Failed to initialize Owner API")
     mainloopcount = 0
 
     # Create HTTP Server Thread
