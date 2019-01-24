@@ -3,6 +3,7 @@ import numpy as np
 import urllib2
 import zipfile
 import threading
+from pathlib import Path
 
 SAMPLES = 1201  # Change this to 3601 for SRTM1
 HGTDIR = 'hgt'  # All 'hgt' files will be kept here uncompressed
@@ -56,20 +57,25 @@ def get_file_name(lat, lon):
     if os.path.isfile(hgt_file_path):
         return hgt_file_path
     else:
-        print("Don't have it, downloading: " + HGT_EURASIA + hgt_file + '.zip' + " to " + hgt_file_path + '.zip')
-        try:
-            response = urllib2.urlopen(HGT_EURASIA + hgt_file + '.zip')
-            data = response.read()
-            file_ = open (hgt_file_path + '.zip', 'w')
-            file_.write(data)
-            file_.close()
-            zip_ = zipfile.ZipFile(hgt_file_path + '.zip')
-            zip_.extractall(HGTDIR)
-            zip_.close()
-            return hgt_file_path
-        except urllib2.HTTPError as e:
-            print("HTTP Error:", e.code, e.url)
-        except urllib2.URLError as e:
-            print("URL Error:", e.reason, e.url)
-        return None
-
+        if not os.path.isfile(hgt_file_path + ".zip.downloading"):
+            print("Don't have it, downloading: " + HGT_EURASIA + hgt_file + '.zip' + " to " + hgt_file_path + '.zip')
+            try:
+                Path(hgt_file_path + '.zip.downloading').touch()
+                response = urllib2.urlopen(HGT_EURASIA + hgt_file + '.zip')
+                data = response.read()
+                file_ = open (hgt_file_path + '.zip', 'w')
+                file_.write(data)
+                file_.close()
+                zip_ = zipfile.ZipFile(hgt_file_path + '.zip')
+                zip_.extractall(HGTDIR)
+                zip_.close()
+                # os.remove(hgt_file_path + '.zip.downloading')
+                return hgt_file_path
+            except urllib2.HTTPError as e:
+                print("HTTP Error:", e.code, e.url)
+            except urllib2.URLError as e:
+                print("URL Error:", e.reason, e.url)
+            return None
+        else:
+            print("Thread aborting, downloading already")
+            return None
