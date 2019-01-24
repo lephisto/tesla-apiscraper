@@ -7,3 +7,4 @@ apiscraper.log
 .idea
 hgt/*.zip
 hgt/*.hgt
+hgt/*.downloading
