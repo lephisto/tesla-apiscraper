@@ -73,6 +73,3 @@ def get_file_name(lat, lon):
             print("URL Error:", e.reason, e.url)
         return None
 
-test_hgt_file = get_file_name(49.009369, 12.104186)
-print(test_hgt_file)
-read_elevation_from_file(test_hgt_file, 49.009369, 12.104186)
