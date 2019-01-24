@@ -112,6 +112,21 @@ Once you know everything is running fine you can start the scraper to keep runni
 tmux new-session -s apiscraper 'python apiscraper.py'
 ```
 
+## Building with Docker
+
+Alternatively, you can build and run tesla-apiscraper via Docker.
+
+To build, run:
+
+```
+docker build ./ -t tesla-apiscraper
+```
+
+To run it, use:
+
+```
+docker run -p 3000:3000 -e "TESLA_USERNAME=<your tesla email>" -e "TESLA_PASSWORD=<your tesla password>" tesla-apiscraper:latest
+```
 ## Using the API for the Scraper App for android
 
 There's a little Android App, that can help you letting your car sleep and immidiately turn on scraping when needed. You need to uncomment and configure the follwing Values for it in config.py:
