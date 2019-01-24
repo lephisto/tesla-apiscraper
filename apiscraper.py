@@ -28,9 +28,13 @@ import threading
 import json
 import Queue
 
+
 from BaseHTTPServer import HTTPServer
 from BaseHTTPServer import BaseHTTPRequestHandler
 from io import BytesIO
+
+from srtmread import elevationtoinflux
+
 
 from influxdb import InfluxDBClient
 from pprint import pprint
@@ -39,6 +43,8 @@ from config import *
 a_vin = ""
 a_displayname = ""
 a_ignore = ["media_state", "software_update", "speed_limit_mode"]
+
+
 
 postq = Queue.Queue()
 http_condition = threading.Condition()
@@ -68,7 +74,9 @@ def setup_custom_logger(name):
     logger.addHandler(screen_handler)
     return logger
 
+
 logger = setup_custom_logger('apiscraper')
+
 
 class StateMonitor(object):
     """ Monitor all Tesla states."""
@@ -142,6 +150,8 @@ class StateMonitor(object):
         global a_vin
         global a_displayname
         global a_ignore
+        a_lat = None
+        a_long = None
         # Request and process all Tesla states
         any_change = False
         logger.info(">> Request vehicle data")
@@ -160,6 +170,17 @@ class StateMonitor(object):
                     new_value = result[element]
                     if element == "vehicle_name" and not new_value:
                         continue
+                    if element == "native_latitude":
+                        a_lat = new_value;
+                    if element == "native_longitude":
+                        a_long = new_value;
+                    if a_lat is not None and a_long is not None and a_resolve_elevation:
+                        # Fire and forget Elevation retrieval..
+                        thread = threading.Thread(target=elevationtoinflux, args=(a_lat,a_long, a_vin, a_displayname, timestamp, influxclient, a_dryrun))
+                        thread.daemon = True
+                        thread.start()
+                        a_lat = None
+                        a_long = None
                     if ((old_value == '') or ((new_value is not None) and (new_value != old_value))):
                         logger.info("Value Change, SG: " + request + ": Logging..." + element +
                                     ": old value: " + str(old_value) + ", new value: " + str(new_value))
@@ -245,6 +266,7 @@ def lastStateReport(f_vin):
     point = list(influxresult.get_points(measurement='vehicle_state'))
     return(point[0])
 
+
 # HTTP Thread Handler
 class apiHandler(BaseHTTPRequestHandler):
 
@@ -306,17 +328,20 @@ class apiHandler(BaseHTTPRequestHandler):
             s.send_response(400)
         s.end_headers()
 
+
 class QueuingHTTPServer(HTTPServer):
     def __init__(self, server_address, RequestHandlerClass, pqueue, cond, bind_and_activate=True):
         HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
         self.pqueue = postq
         self.condition = cond
 
+
 def run_server(port, pq, cond):
     httpd = QueuingHTTPServer(('0.0.0.0', port), apiHandler, pq, cond)
     while True:
         print("HANDLE: " + threading.current_thread().name)
         httpd.handle_request()
+
 
 if __name__ == "__main__":
     # Create Tesla API Interface
@@ -338,7 +363,7 @@ if __name__ == "__main__":
 
 # Main Program Loop. messy..
 while True:
-    #Look if there's something from the WEbservers Post Queue
+    # Look if there's something from the WEbservers Post Queue
     while not postq.empty():
         req = json.loads(postq.get())
         pprint(req)

@@ -90,6 +90,19 @@ git checkout v2019.1
 pip install influxdb
 ```
 
+- Install requirements for Elevation Calculation
+
+```
+apt install gdal-bin
+pip install elevation
+eio selfcheck
+```
+... should Produce:
+
+```
+Your system is ready.
+```  
+
 - Configure API Scraper
 
 ```
