@@ -92,7 +92,7 @@ class StateMonitor(object):
     def ongoing_activity_status(self):
         """ True if the car is not in park, or is actively charging ... """
         shift = self.old_values['drive_state'].get('shift_state', '');
-        if shift == "R" or shift == "D" or shift == "N":
+        if shift == "R" or shift == "D" or shift == "N" or self.old_values['drive_state'].get('speed', 0) > 0:
             return True
         if self.old_values['charge_state'].get('charging_state', '') in [
                 "Charging", "Starting"]:
