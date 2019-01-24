@@ -176,12 +176,13 @@ class StateMonitor(object):
                         a_long = new_value;
                     if a_lat is not None and a_long is not None and a_resolve_elevation:
                         # Fire and forget Elevation retrieval..
-                        thread = threading.Thread(target=elevationtoinflux, args=(a_lat,a_long, a_vin, a_displayname, timestamp, influxclient, a_dryrun))
-                        thread.daemon = True
-                        thread.start()
+                        if not elevator.is_alive():
+                            elevator = threading.Thread(target=elevationtoinflux, args=(a_lat,a_long, a_vin, a_displayname, timestamp, influxclient, a_dryrun))
+                            elevator.daemon = True
+                            elevator.start()
                         a_lat = None
                         a_long = None
-                    if ((old_value == '') or ((new_value is not None) and (new_value != old_value))):
+                    if (old_value == '') or ((new_value is not None) and (new_value != old_value)):
                         logger.info("Value Change, SG: " + request + ": Logging..." + element +
                                     ": old value: " + str(old_value) + ", new value: " + str(new_value))
                         if not header_printed:
