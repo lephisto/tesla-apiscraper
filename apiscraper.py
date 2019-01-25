@@ -56,6 +56,7 @@ disableScrape = a_start_disabled
 disabledsince = 0
 busysince = 0
 caractive_state = False
+resume = False
 
 influxclient = InfluxDBClient(
     a_influxhost, a_influxport, a_influxuser, a_influxpass, a_influxdb)
@@ -379,6 +380,7 @@ while True:
             disableScrape = req['value']
             if not disableScrape:
                 poll_interval = 1
+                resume = true
             else:
                 disabledsince = time.time()
 
@@ -390,7 +392,7 @@ while True:
         busysince = int(time.time())
         # We cannot be sleeping with small poll interval for sure.
         # In fact can we be sleeping at all if scraping is enabled?
-        if poll_interval >= 64:
+        if poll_interval >= 64 or resume:
             state_monitor.refresh_vehicle()
         # Car woke up
         if is_asleep == 'asleep' and state_monitor.vehicle['state'] == 'online':
@@ -429,6 +431,7 @@ while True:
         if poll_interval >= 0:
             if is_asleep != 'asleep':
                 poll_interval = state_monitor.check_states(poll_interval)
+                resume = False
         elif poll_interval < 0:
             state_monitor.wake_up()
             poll_interval = 1
