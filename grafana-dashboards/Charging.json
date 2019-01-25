@@ -79,7 +79,7 @@
   "gnetId": null,
   "graphTooltip": 2,
   "id": null,
-  "iteration": 1547403633396,
+  "iteration": 1548414540801,
   "links": [],
   "panels": [
     {
@@ -172,9 +172,9 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "ideal_battery_range"
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
             }
           ]
         }
@@ -284,9 +284,9 @@
           ],
           "tags": [
             {
-              "key": "metric",
+              "key": "display_name",
               "operator": "=",
-              "value": "est_battery_range"
+              "value": "Ulysses"
             }
           ]
         }
@@ -370,6 +370,8 @@
           "measurement": "charge_state",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT last(\"battery_range\") *$rangefactor FROM \"charge_state\" WHERE (\"metric\" = 'battery_range') AND $timeFilter",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -394,9 +396,9 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "battery_range"
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
             }
           ]
         }
@@ -424,6 +426,7 @@
         "#d44a3a"
       ],
       "datasource": "${DS_TESLA}",
+      "description": "Energy added on last Charge",
       "format": "kwatth",
       "gauge": {
         "maxValue": 100,
@@ -493,9 +496,9 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "charge_energy_added"
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
             }
           ]
         }
@@ -595,12 +598,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "time_to_full_charge"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -699,12 +696,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "charger_phases"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -808,12 +799,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "charger_actual_current"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -900,7 +885,7 @@
           "measurement": "charge_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"charger_voltage\") FROM \"charge_state\" WHERE (\"metric\" = 'charger_voltage' AND \"display_name\" =~ /^$vehicle_name$/) ",
+          "query": "SELECT last(\"charger_voltage\") FROM \"charge_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/) ",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1021,12 +1006,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "charger_voltage"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -1058,7 +1037,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -1159,12 +1138,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "battery_level"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -1232,7 +1205,7 @@
             },
             {
               "params": [
-                "previous"
+                "linear"
               ],
               "type": "fill"
             }
@@ -1240,6 +1213,8 @@
           "measurement": "charge_state",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT mean(\"battery_level\") FROM \"charge_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/) AND $timeFilter GROUP BY time($__interval) fill(linear)",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1289,6 +1264,8 @@
           "measurement": "charge_state",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT mean(\"charge_limit_soc\") FROM \"charge_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/) AND $timeFilter GROUP BY time($__interval) fill(previous)",
+          "rawQuery": true,
           "refId": "B",
           "resultFormat": "time_series",
           "select": [
@@ -1446,12 +1423,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "charger_power"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -1545,12 +1516,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "charger_power"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -1594,12 +1559,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "power"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -1714,6 +1673,8 @@
           "measurement": "charge_state",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT \"charging_state\" FROM \"charge_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/) AND $timeFilter-5d",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1852,8 +1813,8 @@
           "measurement": "charge_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"battery_heater_on\" FROM \"charge_state\" WHERE (\"metric\" = 'battery_heater_on') AND $timeFilter",
-          "rawQuery": false,
+          "query": "SELECT \"battery_heater_on\" FROM \"charge_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/) AND $timeFilter-5d",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1940,7 +1901,7 @@
       "writeMetricNames": false
     }
   ],
-  "refresh": "30s",
+  "refresh": false,
   "schemaVersion": 16,
   "style": "dark",
   "tags": [
@@ -2044,5 +2005,5 @@
   "timezone": "",
   "title": "Charging",
   "uid": "dNviSBUmk",
-  "version": 112
+  "version": 141
 }

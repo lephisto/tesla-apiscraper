@@ -52,7 +52,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1547294298171,
+  "iteration": 1548414552551,
   "links": [],
   "panels": [
     {
@@ -135,12 +135,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "fan_status"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -184,12 +178,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "inside_temp"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -233,12 +221,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "outside_temp"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -372,12 +354,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "seat_heater_left"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -411,7 +387,7 @@
           "value": "3"
         }
       ],
-      "valueName": "avg"
+      "valueName": "current"
     },
     {
       "cacheTimeout": null,
@@ -469,7 +445,7 @@
         "fillColor": "rgba(31, 118, 189, 0.18)",
         "full": false,
         "lineColor": "rgb(31, 120, 193)",
-        "show": true
+        "show": false
       },
       "tableColumn": "",
       "targets": [
@@ -478,8 +454,8 @@
           "measurement": "climate_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"steering_wheel_heater\" FROM \"climate_state\" WHERE (\"metric\" = 'steering_wheel_heater' AND \"display_name\" =~ /^$vehicle_name$/) and steering_wheel_heater=true AND $timeFilter",
-          "rawQuery": false,
+          "query": "SELECT last(\"steering_wheel_heater\") FROM \"climate_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/) AND $timeFilter",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -498,12 +474,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "steering_wheel_heater"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -512,7 +482,7 @@
         }
       ],
       "thresholds": "",
-      "title": "Panel Title",
+      "title": "Steering Wheel",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -527,7 +497,7 @@
           "value": "null"
         }
       ],
-      "valueName": "max"
+      "valueName": "current"
     },
     {
       "cacheTimeout": null,
@@ -614,12 +584,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "seat_heater_right"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -628,7 +592,7 @@
         }
       ],
       "thresholds": "",
-      "title": "Seat Heater :: Left",
+      "title": "Seat Heater :: Right",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -653,7 +617,7 @@
           "value": "3"
         }
       ],
-      "valueName": "avg"
+      "valueName": "current"
     },
     {
       "cacheTimeout": null,
@@ -740,12 +704,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "seat_heater_rear_left"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -779,7 +737,7 @@
           "value": "3"
         }
       ],
-      "valueName": "avg"
+      "valueName": "current"
     },
     {
       "cacheTimeout": null,
@@ -866,12 +824,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "seat_heater_rear_center"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -905,7 +857,7 @@
           "value": "3"
         }
       ],
-      "valueName": "avg"
+      "valueName": "current"
     },
     {
       "cacheTimeout": null,
@@ -992,12 +944,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "seat_heater_rear_right"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -1031,7 +977,7 @@
           "value": "3"
         }
       ],
-      "valueName": "avg"
+      "valueName": "current"
     }
   ],
   "schemaVersion": 16,
@@ -1095,5 +1041,5 @@
   "timezone": "",
   "title": "Climate",
   "uid": "i5jNBBUik",
-  "version": 35
+  "version": 46
 }

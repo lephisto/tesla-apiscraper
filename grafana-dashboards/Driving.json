@@ -71,7 +71,7 @@
   "gnetId": null,
   "graphTooltip": 2,
   "id": null,
-  "iteration": 1547309177313,
+  "iteration": 1548414483741,
   "links": [],
   "panels": [
     {
@@ -94,7 +94,7 @@
       },
       "gridPos": {
         "h": 3,
-        "w": 4,
+        "w": 2,
         "x": 0,
         "y": 0
       },
@@ -165,9 +165,9 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "odometer"
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
             }
           ]
         }
@@ -206,10 +206,10 @@
       "gridPos": {
         "h": 3,
         "w": 2,
-        "x": 4,
+        "x": 2,
         "y": 0
       },
-      "id": 13,
+      "id": 28,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -226,8 +226,8 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "postfix": "",
-      "postfixFontSize": "50%",
+      "postfix": "$rangeunit",
+      "postfixFontSize": "30%",
       "prefix": "",
       "prefixFontSize": "50%",
       "rangeMaps": [
@@ -246,11 +246,135 @@
       "tableColumn": "",
       "targets": [
         {
+          "alias": "Distance driven",
           "groupBy": [],
+          "measurement": "vehicle_state",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "odometer"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "spread"
+              },
+              {
+                "params": [
+                  "* $rangefactor"
+                ],
+                "type": "math"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": "",
+      "title": "Distance",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "${DS_TESLA}",
+      "decimals": 0,
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 4,
+        "y": 0
+      },
+      "id": 30,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "kwh",
+      "postfixFontSize": "30%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "1s"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "0"
+              ],
+              "type": "fill"
+            }
+          ],
           "measurement": "drive_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"shift_state\") FROM \"drive_state\" WHERE (\"metric\" = 'shift_state' AND \"display_name\" =~ /^$vehicle_name$/) ",
+          "query": "select cumulative_sum(psum)/1000 from (SELECT sum(\"power\") as psum FROM \"drive_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/) AND power > 0 AND $timeFilter GROUP BY time(3600s) fill(0))",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -258,13 +382,13 @@
             [
               {
                 "params": [
-                  "shift_state"
+                  "power"
                 ],
                 "type": "field"
               },
               {
                 "params": [],
-                "type": "last"
+                "type": "sum"
               }
             ]
           ],
@@ -272,7 +396,7 @@
             {
               "key": "metric",
               "operator": "=",
-              "value": "shift_state"
+              "value": "power"
             },
             {
               "condition": "AND",
@@ -284,7 +408,7 @@
         }
       ],
       "thresholds": "",
-      "title": "Drivemode",
+      "title": "Panel Title",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -381,12 +505,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "est_battery_range"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -504,12 +622,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "outside_temp"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -627,12 +739,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "inside_temp"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -706,12 +812,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "native_latitude"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -754,12 +854,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "native_longitude"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -836,7 +930,7 @@
           "measurement": "drive_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"speed\") * $rangefactor FROM \"drive_state\" WHERE (\"metric\" = 'speed' AND \"display_name\" =~ /^$vehicle_name$/)",
+          "query": "SELECT last(\"speed\") * $rangefactor FROM \"drive_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -919,7 +1013,13 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "seriesOverrides": [],
+      "seriesOverrides": [
+        {
+          "alias": "Battery Level",
+          "fill": 0,
+          "yaxis": 2
+        }
+      ],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
@@ -943,7 +1043,7 @@
           "measurement": "drive_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"speed\") * $rangefactor FROM \"drive_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/ AND \"metric\" = 'speed') AND $timeFilter GROUP BY time(5s) fill(previous)",
+          "query": "SELECT mean(\"speed\") * $rangefactor FROM \"drive_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/ ) AND $timeFilter GROUP BY time(5s) fill(previous)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -980,6 +1080,55 @@
               "value": "speed"
             }
           ]
+        },
+        {
+          "alias": "Battery Level",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "previous"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "charge_state",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "battery_level"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "metric",
+              "operator": "=",
+              "value": "battery_level"
+            },
+            {
+              "condition": "AND",
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
+            }
+          ]
         }
       ],
       "thresholds": [],
@@ -1010,8 +1159,8 @@
           "show": true
         },
         {
-          "format": "short",
-          "label": null,
+          "format": "percent",
+          "label": "Battery",
           "logBase": 1,
           "max": null,
           "min": null,
@@ -1088,7 +1237,7 @@
           "measurement": "drive_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT last(\"power\") FROM \"drive_state\" WHERE (\"metric\" = 'power' AND \"display_name\" =~ /^$vehicle_name$/)",
+          "query": "SELECT last(\"power\") FROM \"drive_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1165,7 +1314,12 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "seriesOverrides": [],
+      "seriesOverrides": [
+        {
+          "alias": "Elevation",
+          "yaxis": 2
+        }
+      ],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
@@ -1189,7 +1343,7 @@
           "measurement": "drive_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"power\") FROM \"drive_state\" WHERE (\"metric\" = 'power' AND \"display_name\" =~ /^$vehicle_name$/) AND $timeFilter GROUP BY time(1s) fill(previous)",
+          "query": "SELECT mean(\"power\") FROM \"drive_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/) AND $timeFilter GROUP BY time(1s) fill(previous)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1215,6 +1369,49 @@
             },
             {
               "condition": "AND",
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
+            }
+          ]
+        },
+        {
+          "alias": "Elevation",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "drive_state",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "elevation"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -1250,18 +1447,129 @@
           "show": true
         },
         {
-          "format": "short",
+          "format": "lengthm",
           "label": null,
-          "logBase": 1,
+          "logBase": 2,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
+        "align": true,
         "alignLevel": null
       }
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "rgba(237, 129, 40, 0.89)",
+        "#d44a3a"
+      ],
+      "datasource": "${DS_TESLA}",
+      "format": "none",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 0,
+        "y": 13
+      },
+      "id": 13,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [],
+          "measurement": "drive_state",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT last(\"shift_state\") FROM \"drive_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/) ",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "shift_state"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "last"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "metric",
+              "operator": "=",
+              "value": "shift_state"
+            },
+            {
+              "condition": "AND",
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": "",
+      "title": "Drivemode",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "avg"
     },
     {
       "backgroundColor": "rgba(128,128,128,0.1)",
@@ -1296,7 +1604,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 16
       },
       "hideTimeOverride": false,
       "highlightOnMouseover": true,
@@ -1325,10 +1633,10 @@
           "measurement": "vehicle_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"state\" FROM \"vehicle_state\" WHERE (\"metric\" = 'state' AND \"display_name\" =~ /^$vehicle_name$/) AND  $timeFilter\n",
-          "rawQuery": false,
+          "query": "SELECT \"state\" FROM \"vehicle_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/) AND $timeFilter-5d\n",
+          "rawQuery": true,
           "refId": "A",
-          "resultFormat": "time_series",
+          "resultFormat": "table",
           "select": [
             [
               {
@@ -1446,7 +1754,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 20
       },
       "highlightOnMouseover": true,
       "id": 24,
@@ -1490,12 +1798,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "shift_state"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -1601,7 +1903,7 @@
         "h": 5,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 24
       },
       "highlightOnMouseover": true,
       "id": 26,
@@ -1646,12 +1948,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "battery_heater_on"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -1700,7 +1996,7 @@
         "value": "minutes"
       },
       "timeTextColor": "#d8d9da",
-      "title": "Panel Title",
+      "title": "Battery Heater",
       "type": "natel-discrete-panel",
       "units": "short",
       "useTimePrecision": false,
@@ -1800,7 +2096,7 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -1831,5 +2127,5 @@
   "timezone": "",
   "title": "Driving",
   "uid": "Imf45f8iz",
-  "version": 118
+  "version": 146
 }
