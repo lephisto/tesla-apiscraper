@@ -93,15 +93,16 @@ pip install influxdb
 - Install requirements for Elevation Calculation
 
 ```
-apt install gdal-bin
-pip install elevation pathlib 
-eio selfcheck
+git clone https://github.com/tkrajina/srtm.py
+cd srtm.py
+python ./setup.py install --user
+cd ..
 ```
-... should Produce:
 
+Important: 
 ```
-Your system is ready.
-```  
+rm -rf srtm.py  
+```
 
 - Configure API Scraper
 
