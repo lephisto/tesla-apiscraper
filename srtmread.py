@@ -17,7 +17,7 @@ def elevationtoinflux(lat, lon, vin, displayname, ts, ifclient, dryrun):
                     "vin": vin,
                     "display_name": displayname,
                 },
-                "time": ts * 1000000000,
+                "time": ts * 1000000,
                 "fields": {
                     "elevation": elevation
                 }
