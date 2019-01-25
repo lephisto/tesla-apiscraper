@@ -71,7 +71,7 @@
   "gnetId": null,
   "graphTooltip": 2,
   "id": null,
-  "iteration": 1548414483741,
+  "iteration": 1548415801098,
   "links": [],
   "panels": [
     {
@@ -1043,7 +1043,7 @@
           "measurement": "drive_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"speed\") * $rangefactor FROM \"drive_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/ ) AND $timeFilter GROUP BY time(5s) fill(previous)",
+          "query": "SELECT mean(\"speed\") * $rangefactor FROM \"drive_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/ ) AND $timeFilter GROUP BY time($__interval) fill(previous)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1343,7 +1343,7 @@
           "measurement": "drive_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"power\") FROM \"drive_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/) AND $timeFilter GROUP BY time(1s) fill(previous)",
+          "query": "SELECT mean(\"power\") FROM \"drive_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/) AND $timeFilter GROUP BY time($__interval) fill(previous)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -2096,7 +2096,7 @@
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-7d",
     "to": "now"
   },
   "timepicker": {
@@ -2127,5 +2127,5 @@
   "timezone": "",
   "title": "Driving",
   "uid": "Imf45f8iz",
-  "version": 146
+  "version": 148
 }
