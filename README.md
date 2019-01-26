@@ -7,6 +7,10 @@ _Current Release: v2019.1_
 
 This can be hosted on any System that's capable of running InfluxDB, Grafana and Python. In this short guide I assume you're using a Debian'ish OS. It can run on a dedicated Linuxserver out there on the Internets or on your home Raspberry Pi.
 
+## Android
+
+The App is available on [here on Google Play](https://play.google.com/store/apps/details?id=to.mephis.apiscrapercontrol) 
+
 ## Features
 
 - Capable of handling multiple Vehicles in one Tesla Account
