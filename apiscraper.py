@@ -374,14 +374,15 @@ while True:
     # Look if there's something from the WEbservers Post Queue
     while not postq.empty():
         req = json.loads(postq.get())
-        pprint(req)
         command = req['command']
         if command == "scrape":
             disableScrape = req['value']
             if not disableScrape:
+                logger.info("Resume Scrape requested")
                 poll_interval = 1
-                resume = true
+                resume = True
             else:
+                logger.info("Stop Scrape requested")
                 disabledsince = time.time()
 
     # We need to store this state in this global variable to ensure
