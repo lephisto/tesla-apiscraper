@@ -28,7 +28,6 @@ import threading
 import json
 import Queue
 
-
 from BaseHTTPServer import HTTPServer
 from BaseHTTPServer import BaseHTTPRequestHandler
 from io import BytesIO
@@ -383,7 +382,7 @@ while True:
                 resume = True
             else:
                 logger.info("Stop Scrape requested")
-                disabledsince = time.time()
+                disabledsince = (int(time.time()))
 
     # We need to store this state in this global variable to ensure
     # HTTP thread is able to see it in real time as well.
