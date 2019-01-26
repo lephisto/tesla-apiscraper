@@ -18,7 +18,6 @@
 
 """
 
-import os
 import sys
 import time
 import urllib2
@@ -30,7 +29,6 @@ import Queue
 
 from BaseHTTPServer import HTTPServer
 from BaseHTTPServer import BaseHTTPRequestHandler
-from io import BytesIO
 
 from srtmread import elevationtoinflux
 
