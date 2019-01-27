@@ -792,7 +792,7 @@
           "measurement": "drive_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"native_latitude\" AS \"latitude\", \"native_longitude\" AS \"longitude\" FROM \"drive_state\" WHERE (\"display_name\" = 'Ulysses') AND time >= now() - 6h",
+          "query": "SELECT \"native_latitude\" AS \"latitude\", \"native_longitude\" AS \"longitude\" FROM \"drive_state\" WHERE (\"display_name\" = '/^$vehicle_name$/') AND time >= now() - 6h",
           "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
