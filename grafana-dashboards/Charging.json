@@ -286,7 +286,7 @@
             {
               "key": "display_name",
               "operator": "=",
-              "value": "Ulysses"
+              "value": "/^$vehicle_name$/"
             }
           ]
         }
