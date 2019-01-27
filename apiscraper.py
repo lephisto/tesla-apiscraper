@@ -52,7 +52,7 @@ is_asleep = ''
 disableScrape = a_start_disabled
 disabledsince = 0
 busysince = 0
-caractive_state = False
+caractive_state = None
 resume = False
 
 influxclient = InfluxDBClient(
@@ -99,25 +99,25 @@ class StateMonitor(object):
         """ True if the car is not in park, or is actively charging ... """
         shift = self.old_values['drive_state'].get('shift_state', '');
         if shift == "R" or shift == "D" or shift == "N" or self.old_values['drive_state'].get('speed', 0) > 0:
-            return True
+            return "Driving"
         if self.old_values['charge_state'].get('charging_state', '') in [
                 "Charging", "Starting"]:
-            return True
+            return "Charging"
         # If we just completed the charging, need to wait for voltage to
         # go down to zero too to avoid stale value in the DB.
         if self.old_values['charge_state'].get('charging_state', '') == "Complete" and self.old_values['charge_state'].get('charger_voltage', 0) > 0:
-            return True
+            return "Charging"
 
         if self.old_values['climate_state'].get('is_climate_on', False):
-            return True
+            return "Conditioning"
         # When it's about time to start charging, we want to perform
         # several polling attempts to ensure we catch it starting even
         # when scraping is otherwise disabled
         if self.old_values['charge_state'].get('scheduled_charging_pending', False):
             sched_time = self.old_values['charge_state'].get('scheduled_charging_start_time', 0)
             if abs(sched_time - int(time.time())) <= 2:
-                return True
-        return False
+                return "Charging"
+        return None
 
     def wake_up(self):
         """ mod """
@@ -394,7 +394,7 @@ while True:
     # We need to store this state in this global variable to ensure
     # HTTP thread is able to see it in real time as well.
     caractive_state = state_monitor.ongoing_activity_status()
-    if disableScrape == False or caractive_state:
+    if disableScrape == False or caractive_state is not None:
         disabledsince = 0
         busysince = int(time.time())
         # We cannot be sleeping with small poll interval for sure.
