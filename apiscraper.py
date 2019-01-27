@@ -321,8 +321,6 @@ class apiHandler(BaseHTTPRequestHandler):
 
     #todo
     def do_POST(s):
-        pprint(s.headers)
-        print("DEBUG POST: " + s.path + "API KEY:" + s.headers.get('apikey'))
         if s.path == "/switch" and s.headers.get('apikey') == a_apikey:
             content_length = int(s.headers['Content-Length'])
             body = s.rfile.read(content_length)
