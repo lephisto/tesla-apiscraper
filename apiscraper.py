@@ -117,6 +117,12 @@ class StateMonitor(object):
             sched_time = self.old_values['charge_state'].get('scheduled_charging_start_time', 0)
             if abs(sched_time - int(time.time())) <= 2:
                 return "Charging"
+
+        # If screen is on, the car is definitely not sleeping so no
+        # harm in polling it as long as values are changing
+        if self.old_values['vehicle_state'].get('center_display_state', 0) != 0:
+            return "Screen On"
+
         return None
 
     def wake_up(self):
