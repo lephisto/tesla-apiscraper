@@ -375,6 +375,11 @@ if __name__ == "__main__":
 
 # Main Program Loop. messy..
 while True:
+
+    # We need to store this state in this global variable to ensure
+    # HTTP thread is able to see it in real time as well.
+    caractive_state = state_monitor.ongoing_activity_status()
+
     # Look if there's something from the WEbservers Post Queue
     while not postq.empty():
         req = json.loads(postq.get())
@@ -388,12 +393,17 @@ while True:
             else:
                 logger.info("Stop Scrape requested")
                 disabledsince = (int(time.time()))
+        if command == "oneshot":
+            # Just override the caractive_state for a single
+            # round of requests
+            caractive_state = "oneshot request"
+            logger.info("Oneshot update requested")
+            if is_asleep == "asleep":
+                logger.info("Waking the car up for the oneshot request")
+                state_monitor.wake_up()
+                resume = True
 
-    # We need to store this state in this global variable to ensure
-    # HTTP thread is able to see it in real time as well.
-    caractive_state = state_monitor.ongoing_activity_status()
     if disableScrape == False or caractive_state is not None:
-        disabledsince = 0
         busysince = int(time.time())
         # We cannot be sleeping with small poll interval for sure.
         # In fact can we be sleeping at all if scraping is enabled?
