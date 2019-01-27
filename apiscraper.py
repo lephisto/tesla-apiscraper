@@ -144,6 +144,13 @@ class StateMonitor(object):
                 logger.info("Waiting %d seconds before retrying." % delay)
                 time.sleep(delay)
 
+    def update_vehicle_from_response(self, response):
+        # The other vehicle items are pretty much static.
+        # We don't need to do any db insertions here, the main loop
+        # would perform those for us.
+        for item in [ "state", "display_name" ]:
+            self.vehicle[item] = response[item]
+
     def request_state_group(self):
         global a_vin
         global a_displayname
@@ -154,6 +161,8 @@ class StateMonitor(object):
         any_change = False
         logger.info(">> Request vehicle data")
         r = self.vehicle.get("vehicle_data")
+
+        self.update_vehicle_from_response(r['response'])
 
         for request in self.requests:
             header_printed = False
