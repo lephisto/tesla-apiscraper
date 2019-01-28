@@ -55,6 +55,10 @@ busysince = 0
 caractive_state = None
 resume = False
 
+
+# DON'T CHANGE ANYTHING BELOW
+scraperapi_version = 2019.2
+
 influxclient = InfluxDBClient(
     a_influxhost, a_influxport, a_influxuser, a_influxpass, a_influxdb)
 
@@ -304,7 +308,7 @@ class apiHandler(BaseHTTPRequestHandler):
                 {
                     "result": "ok",
                     "vin": a_vin,
-                    "apikey": a_apikey,
+                    "apiversion": scraperapi_version,
                     "displayname": a_displayname,
                     "state": is_asleep,
                     "disablescraping": disableScrape,
