@@ -308,7 +308,7 @@ class apiHandler(BaseHTTPRequestHandler):
                 {
                     "result": "ok",
                     "vin": a_vin,
-                    "apiversion": scraperapi_version,
+                    "scraperapiversion": scraperapi_version,
                     "displayname": a_displayname,
                     "state": is_asleep,
                     "disablescraping": disableScrape,
