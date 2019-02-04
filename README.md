@@ -1,7 +1,7 @@
 # tesla-apiscraper
 Selfhosted API Scraper for pulling Vehicle Telemetry from the Tesla Owner API into an InfluxDB visualisation on Grafana Dashboards.
 
-_Current Release: v2019.1_
+_Current Release: v2019.2_
 
 **Putting an end to __handing out the Key__ for your 100+ Grand Car to a third party you don't know.**
 
