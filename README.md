@@ -9,7 +9,7 @@ This can be hosted on any System that's capable of running InfluxDB, Grafana and
 
 ## Android
 
-The App is available on [here on Google Play](https://play.google.com/store/apps/details?id=to.mephis.apiscrapercontrol) 
+The App is available on [here on Google Play](https://play.google.com/store/apps/details?id=to.mephis.apiscrapercontrol)
 
 ## Features
 
@@ -28,7 +28,7 @@ The App is available on [here on Google Play](https://play.google.com/store/apps
 
 eg:
 ```
-sudo apt install python
+sudo apt install python python-pathlib
 ```
 
 - Install InfluxDB as in https://docs.influxdata.com/influxdb/v1.7/introduction/installation/ and create a Database where you want to store your Data in:
@@ -81,11 +81,11 @@ There you can change $rangeunit "km" to "mi" and $rangefactor 1.60934 to 1.0 and
 git clone https://github.com/lephisto/tesla-apiscraper
 ```
 
-- Pick a release
+- Always pick a release
 
 eg:
 ```
-git checkout v2019.1
+git checkout v2019.2
 ```
 
 - Get Python InfluxDB Module
@@ -103,7 +103,7 @@ python ./setup.py install --user
 cd ..
 ```
 
-Important: 
+Important:
 ```
 rm -rf srtm.py  
 ```
