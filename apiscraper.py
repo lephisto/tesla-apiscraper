@@ -50,7 +50,7 @@ poll_interval = 1   # Set to -1 to wakeup the Car on Scraper start
 asleep_since = 0
 is_asleep = ''
 disableScrape = a_start_disabled
-disabledsince = (int(time.time()))
+disabledsince = 0
 busysince = 0
 caractive_state = None
 resume = False
@@ -400,6 +400,7 @@ while True:
             if not disableScrape:
                 logger.info("Resume Scrape requested")
                 poll_interval = 1
+                disabledsince=0
                 resume = True
             else:
                 logger.info("Stop Scrape requested")
