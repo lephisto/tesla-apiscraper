@@ -183,7 +183,7 @@ class StateMonitor(object):
                 break
             self.old_values[request]['timestamp'] = timestamp
             for element in sorted(result):
-                if element not in ("timestamp", "gps_as_of", "left_temp_direction", "right_temp_direction"):
+                if element not in ("timestamp", "gps_as_of", "left_temp_direction", "right_temp_direction", "charge_port_latch"):
                     old_value = self.old_values[request].get(element, '')
                     new_value = result[element]
                     if element == "vehicle_name" and not new_value:
@@ -192,6 +192,10 @@ class StateMonitor(object):
                         a_lat = new_value;
                     if element == "native_longitude":
                         a_long = new_value;
+                    if new_value and old_value and ((element == "inside_temp") or (element == "outside_temp")):
+                        if abs(new_value - old_value) < 1.0:
+                           new_value = old_value;
+                           logger.info("Only minimal temperature difference received. No change registered to avoid wakelock.")
                     if (old_value == '') or ((new_value is not None) and (new_value != old_value)):
                         logger.info("Value Change, SG: " + request + ": Logging..." + element +
                                     ": old value: " + str(old_value) + ", new value: " + str(new_value))
