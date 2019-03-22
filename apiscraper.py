@@ -196,6 +196,10 @@ class StateMonitor(object):
                         if abs(new_value - old_value) < 1.0:
                            new_value = old_value;
                            logger.info("Only minimal temperature difference received. No change registered to avoid wakelock.")
+                    if new_value and old_value and ((element == "battery_range") or (element == "est_battery_range") or (element == "ideal_battery_range")):
+                        if abs(new_value - old_value) < 0.5:
+                           new_value = old_value;
+                           logger.info("Only minimal range difference received. No change registered to avoid wakelock.")
                     if (old_value == '') or ((new_value is not None) and (new_value != old_value)):
                         logger.info("Value Change, SG: " + request + ": Logging..." + element +
                                     ": old value: " + str(old_value) + ", new value: " + str(new_value))
