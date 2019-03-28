@@ -1,27 +1,27 @@
 # Telsa Credentials
-a_tesla_email = '<email>'               # myTesla Account Username
-a_tesla_passwd = '<password>'           # myTesla Account Password
-a_tesla_caridx = 0                      # Index of the Car in myTesla Account in case of multiple Cars
-a_allowsleep = 1                        # Allow Car to fall asleep / don't wake up if car is asleep on Scraper start
-a_maximumsleep = 1024                   # Wake up every X seconds, if car is asleep
+a_tesla_email = '<email>'  # myTesla Account Username
+a_tesla_password = '<password>'  # myTesla Account Password
+a_tesla_car_idx = 0  # Index of the Car in myTesla Account in case of multiple Cars
+a_allow_sleep = 1  # Allow Car to fall asleep / don't wake up if car is asleep on Scraper start
+a_maximum_sleep = 1024  # Wake up every X seconds, if car is asleep
 
 # Scraper API Config (you need that for using the android App)
-a_enableapi = True
-a_apikey = 'somerandomnumberwithenoughdigitsthatcantbeguessedeasily'
-a_apiport = 8023
-a_start_disabled = False		# Scrapper state on startup. This could
-					# be changed with the app if the
-					# a_enableapi is True
-a_resolve_elevation = True      # Resolve Coordinates to Elevation. Will Autodownload Elevation data from https://dds.cr.usgs.gov
+a_enable_api = True
+a_api_key = 'somerandomnumberwithenoughdigitsthatcantbeguessedeasily'
+a_api_port = 8023
+a_start_disabled = False  # Scrapper state on startup. This could
+# be changed with the app if the
+# a_enable_api is True
+a_resolve_elevation = True  # Resolve Coordinates to Elevation. Will Autodownload Elevation data from https://dds.cr.usgs.gov
 
 # Logging
-a_logfile = 'apiscraper.log'            # APIScraper Logfile
+a_logfile = 'apiscraper.log'  # APIScraper Logfile
 
 # Influx DB Credentials
-a_influxhost = 'localhost'              #InfluxDB Host
-a_influxport = 8086                     #InfluxDB Port
-a_influxuser = 'tesla'                  #InfluxDB Username
-a_influxpass = '<influxdbpassword>'     #InfluxDB Password
-a_influxdb = 'tesla'                    #InfluxDB Datebasename
+a_influx_host = 'localhost'  # InfluxDB Host
+a_influx_port = 8086  # InfluxDB Port
+a_influx_user = 'tesla'  # InfluxDB Username
+a_influx_pass = '<influxdbpassword>'  # InfluxDB Password
+a_influx_db = 'tesla'  # InfluxDB Datebasename
 
-a_dryrun = False  #Just for debugging purposes
+a_dry_run = False  # Just for debugging purposes
