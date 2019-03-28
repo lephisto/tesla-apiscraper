@@ -1,7 +1,9 @@
 import os
 import sys
-import srtm
 from pathlib import Path
+
+import srtm
+
 
 def elevationtoinflux(lat, lon, vin, displayname, ts, ifclient, dryrun):
     if not os.path.isfile('srtm.lck.' + str(os.getpid())):
@@ -17,7 +19,7 @@ def elevationtoinflux(lat, lon, vin, displayname, ts, ifclient, dryrun):
                     "vin": vin,
                     "display_name": displayname,
                 },
-                "time": ts * 1000000,
+                "time": int(ts * 1000000),
                 "fields": {
                     "elevation": elevation
                 }

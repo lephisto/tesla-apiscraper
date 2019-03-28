@@ -18,35 +18,30 @@
 
 """
 
-import sys
-import time
-import urllib2
-import teslajson
-import logging
-import threading
 import json
-import Queue
-
-from BaseHTTPServer import HTTPServer
-from BaseHTTPServer import BaseHTTPRequestHandler
-
-from srtmread import elevationtoinflux
-
+import logging
+import queue
+import sys
+import threading
+import time
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.error import URLError
 
 from influxdb import InfluxDBClient
-from pprint import pprint
+from urllib3.exceptions import HTTPError
+
+import teslajson
 from config import *
+from srtmread import elevationtoinflux
 
 a_vin = ""
 a_displayname = ""
 a_ignore = ["media_state", "software_update", "speed_limit_mode"]
 
-
-
-postq = Queue.Queue()
+postq = queue.Queue()
 http_condition = threading.Condition()
 
-poll_interval = 1   # Set to -1 to wakeup the Car on Scraper start
+poll_interval = 1  # Set to -1 to wakeup the Car on Scraper start
 asleep_since = 0
 is_asleep = ''
 disableScrape = a_start_disabled
@@ -54,7 +49,6 @@ disabledsince = 0
 busysince = 0
 caractive_state = None
 resume = False
-
 
 # DON'T CHANGE ANYTHING BELOW
 scraperapi_version = 2019.2
@@ -82,34 +76,37 @@ logger = setup_custom_logger('apiscraper')
 
 class StateMonitor(object):
     """ Monitor all Tesla states."""
+
     def __init__(self, a_tesla_email, a_tesla_passwd):
         self.requests = ("charge_state", "climate_state", "drive_state",
                          "gui_settings", "vehicle_state")
-        self.priority_requests = {1: ("drive_state", ),
-                                  2: ("drive_state", ),
-                                  4: ("charge_state", "drive_state", )}
+        self.priority_requests = {1: ("drive_state",),
+                                  2: ("drive_state",),
+                                  4: ("charge_state", "drive_state",)}
         self.old_values = dict([(r, {}) for r in self.requests])
 
         self.connection = teslajson.Connection(a_tesla_email, a_tesla_passwd)
         self.vehicle = self.connection.vehicles[a_tesla_caridx]
 
     def refresh_vehicle(self):
-        #refreshes the vehicle object
+        # refreshes the vehicle object
         logger.info(">> self.connection.refresh_vehicle()")
         self.connection.refresh_vehicle()
         self.vehicle = self.connection.vehicles[a_tesla_caridx]
 
     def ongoing_activity_status(self):
         """ True if the car is not in park, or is actively charging ... """
-        shift = self.old_values['drive_state'].get('shift_state', '');
-        if shift == "R" or shift == "D" or shift == "N" or self.old_values['drive_state'].get('speed', 0) > 0:
+        shift = self.old_values['drive_state'].get('shift_state', '')
+        old_speed = self.old_values['drive_state'].get('speed', 0) or 0
+        if shift == "R" or shift == "D" or shift == "N" or old_speed > 0:
             return "Driving"
         if self.old_values['charge_state'].get('charging_state', '') in [
-                "Charging", "Starting"]:
+            "Charging", "Starting"]:
             return "Charging"
         # If we just completed the charging, need to wait for voltage to
         # go down to zero too to avoid stale value in the DB.
-        if (self.old_values['charge_state'].get('charging_state', '') == "Complete" or self.old_values['charge_state'].get('charging_state', '') == "Stopped") \
+        if (self.old_values['charge_state'].get('charging_state', '') == "Complete" or self.old_values[
+            'charge_state'].get('charging_state', '') == "Stopped") \
                 and self.old_values['charge_state'].get('charger_voltage', 0) > 0:
             return "Charging"
 
@@ -149,7 +146,7 @@ class StateMonitor(object):
                     if element == "display_name":
                         a_displayname = result[element]
                 return
-            except (KeyError, urllib2.HTTPError, urllib2.URLError) as details:
+            except (KeyError, HTTPError, URLError) as details:
                 delay *= 2
                 logger.warning("HTTP Error:" + str(details))
                 logger.info("Waiting %d seconds before retrying." % delay)
@@ -159,7 +156,7 @@ class StateMonitor(object):
         # The other vehicle items are pretty much static.
         # We don't need to do any db insertions here, the main loop
         # would perform those for us.
-        for item in [ "state", "display_name" ]:
+        for item in ["state", "display_name"]:
             self.vehicle[item] = response[item]
 
     def request_state_group(self):
@@ -177,7 +174,7 @@ class StateMonitor(object):
 
         for request in self.requests:
             header_printed = False
-            result=r['response'][request]
+            result = r['response'][request]
             timestamp = result['timestamp']
             if self.old_values[request].get('timestamp', '') == timestamp:
                 break
@@ -219,7 +216,7 @@ class StateMonitor(object):
                                             "display_name": a_displayname,
                                             "metric": element
                                         },
-                                        "time": timestamp * 1000000000,
+                                        "time": int(timestamp) * 1000000000,
                                         "fields": {
                                             element: new_value
                                         }
@@ -232,7 +229,8 @@ class StateMonitor(object):
                     # Fire and forget Elevation retrieval..
                     print("starting thread elevator: " + str(a_lat) + "/" + str(a_long) + "/" + str(timestamp))
                     elevator = threading.Thread(target=elevationtoinflux,
-                                                args=(a_lat, a_long, a_vin, a_displayname, timestamp, influxclient, a_dryrun))
+                                                args=(
+                                                a_lat, a_long, a_vin, a_displayname, timestamp, influxclient, a_dryrun))
                     # elevator.daemon = True
                     elevator.setName("elevator")
                     if not elevator.is_alive():
@@ -256,7 +254,7 @@ class StateMonitor(object):
                     interval = 1
                     any_change = True
 
-        except (urllib2.HTTPError, urllib2.URLError) as exc:
+        except (HTTPError, URLError) as exc:
             logger.info("HTTP Error: " + str(exc))
             if a_allowsleep == 1:
                 return interval
@@ -285,16 +283,17 @@ class StateMonitor(object):
             if any_change:  # there have been changes, reduce interval
                 if interval > 1:
                     interval /= 2
-            else:   # there haven't been any changes, increase interval to allow the car to fall asleep
+            else:  # there haven't been any changes, increase interval to allow the car to fall asleep
                 if interval < 2048:
                     interval *= 2
         return interval
 
+
 def lastStateReport(f_vin):
-    query="select time,state from vehicle_state where metric='state' and vin='"+ f_vin +"' order by time desc limit 1"
+    query = "select time,state from vehicle_state where metric='state' and vin='" + f_vin + "' order by time desc limit 1"
     influxresult = influxclient.query(query)
     point = list(influxresult.get_points(measurement='vehicle_state'))
-    return(point[0])
+    return (point[0])
 
 
 # HTTP Thread Handler
@@ -338,7 +337,7 @@ class apiHandler(BaseHTTPRequestHandler):
         s.end_headers()
         s.wfile.write(json.dumps(api_response, indent=4))
 
-    #todo
+    # todo
     def do_POST(s):
         if s.path == "/switch" and s.headers.get('apikey') == a_apikey:
             content_length = int(s.headers['Content-Length'])
@@ -387,7 +386,6 @@ if __name__ == "__main__":
             thread.start()
             logger.info("HTTP Server Thread started on port " + str(a_apiport))
         except KeyboardInterrupt:
-            server.shutdown()
             sys.exit(0)
     elif disableScrape:
         sys.exit("Configuration error: Scraping disabled and no api configured to enable. Bailing out")
@@ -484,7 +482,8 @@ while True:
         # If we have scheduled charging, lets wake up just in time
         # to catch that activity.
         if state_monitor.old_values['charge_state'].get('scheduled_charging_pending', False):
-            tosleep = state_monitor.old_values['charge_state'].get('scheduled_charging_start_time', 0) - int(time.time())
+            tosleep = state_monitor.old_values['charge_state'].get('scheduled_charging_start_time', 0) - int(
+                time.time())
             # This really should not happen
             if tosleep <= 0:
                 tosleep = None
@@ -493,7 +492,7 @@ while True:
         else:
             tosleep = None
 
-    #Look if there's something from the WEbservers Post Queue
+    # Look if there's something from the WEbservers Post Queue
     http_condition.acquire()
     if not postq.empty():
         # Need to turn around and do another round of processing
