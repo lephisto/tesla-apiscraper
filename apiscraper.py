@@ -53,7 +53,7 @@ lastdatafromtesla = None
 resume = False
 
 # DON'T CHANGE ANYTHING BELOW
-scraperapi_version = 2019.2
+scraperapi_version = 2019.3
 
 influx_client = InfluxDBClient(
     a_influx_host, a_influx_port, a_influx_user, a_influx_pass, a_influx_db)
