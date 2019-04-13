@@ -353,7 +353,7 @@ class ApiHandler(BaseHTTPRequestHandler):
         if self.path == "/switch" and self.headers.get('apikey') == a_api_key:
             content_length = int(self.headers['Content-Length'])
             body = self.rfile.read(content_length)
-            post_command = json.loads(body.decode());
+            post_command = json.loads(body.decode())
             if post_command['command'] is not None:
                 self.send_response(200)
                 self.server.condition.acquire()
@@ -410,7 +410,7 @@ while True:
 
     # Look if there's something from the Webservers Post Queue
     while not postq.empty():
-        req = json.loads(postq.get())
+        req = json.loads(postq.get().decode())
         command = req['command']
         if command == "scrape":
             disableScrape = req['value']
