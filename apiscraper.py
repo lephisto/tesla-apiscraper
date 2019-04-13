@@ -49,6 +49,7 @@ disableScrape = a_start_disabled
 disabled_since = 0
 busy_since = 0
 car_active_state = None
+lastdatafromtesla = None
 resume = False
 
 # DON'T CHANGE ANYTHING BELOW
@@ -108,7 +109,7 @@ class StateMonitor(object):
         # go down to zero too to avoid stale value in the DB.
         if (self.old_values['charge_state'].get('charging_state', '') == "Complete" or self.old_values[
             'charge_state'].get('charging_state', '') == "Stopped") \
-                and self.old_values['charge_state'].get('charger_voltage', 0) > 100:
+                and self.old_values['charge_state'].get('charger_voltage', 0) > 10:
             return "Charging"
 
         if self.old_values['climate_state'].get('is_climate_on', False):
@@ -164,6 +165,7 @@ class StateMonitor(object):
         global a_vin
         global a_display_name
         global a_ignore
+        global lastdatafromtesla
         a_lat = None
         a_long = None
         # Request and process all Tesla states
@@ -177,6 +179,7 @@ class StateMonitor(object):
             header_printed = False
             result = r['response'][request]
             timestamp = result['timestamp']
+            lastdatafromtesla = timestamp
             if self.old_values[request].get('timestamp', '') == timestamp:
                 break
             self.old_values[request]['timestamp'] = timestamp
@@ -333,6 +336,7 @@ class ApiHandler(BaseHTTPRequestHandler):
                     "carstate": car_active_state,
                     "disabled_since": disabled_since,
                     "interval": poll_interval,
+                    "lastdatafromtesla": int(lastdatafromtesla/1000),
                     "busy": processing_time
                 }
             ]
@@ -412,6 +416,8 @@ while True:
     while not postq.empty():
         req = json.loads(postq.get().decode())
         command = req['command']
+        val = req['value']
+        logger.info("Command Queue not empty: " + command + ", value: " + str(val))
         if command == "scrape":
             disableScrape = req['value']
             if not disableScrape:
@@ -432,6 +438,7 @@ while True:
                 state_monitor.wake_up()
                 resume = True
 
+    logger.info("DisableScrape: " + str(disableScrape) + ", car_active_state: " + str(car_active_state))
     if disableScrape is False or car_active_state is not None:
         busy_since = int(time.time())
         # We cannot be sleeping with small poll interval for sure.
