@@ -107,7 +107,7 @@ class StateMonitor(object):
         # go down to zero too to avoid stale value in the DB.
         if (self.old_values['charge_state'].get('charging_state', '') == "Complete" or self.old_values[
             'charge_state'].get('charging_state', '') == "Stopped") \
-                and self.old_values['charge_state'].get('charger_voltage', 0) > 0:
+                and self.old_values['charge_state'].get('charger_voltage', 0) > 100:
             return "Charging"
 
         if self.old_values['climate_state'].get('is_climate_on', False):
@@ -308,12 +308,12 @@ def last_state_report(f_vin):
 # HTTP Thread Handler
 class ApiHandler(BaseHTTPRequestHandler):
 
-    def do_head(self):
+    def do_HEAD(self):
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.end_headers()
 
-    def do_get(self):
+    def do_GET(self):
         if self.path == "/state" and self.headers.get('apikey') == a_api_key:
             self.send_response(200)
             busy_since_copy = busy_since
