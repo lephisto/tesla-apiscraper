@@ -42,6 +42,7 @@ postq = queue.Queue()
 http_condition = threading.Condition()
 
 poll_interval = 1  # Set to -1 to wakeup the Car on Scraper start
+poll_count = 0     # Track pollcounting
 asleep_since = 0
 is_asleep = ''
 disableScrape = a_start_disabled
@@ -352,7 +353,7 @@ class ApiHandler(BaseHTTPRequestHandler):
         if self.path == "/switch" and self.headers.get('apikey') == a_api_key:
             content_length = int(self.headers['Content-Length'])
             body = self.rfile.read(content_length)
-            post_command = json.loads(body)
+            post_command = json.loads(body).decode();
             if post_command['command'] is not None:
                 self.send_response(200)
                 self.server.condition.acquire()
