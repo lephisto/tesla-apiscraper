@@ -344,7 +344,8 @@ class ApiHandler(BaseHTTPRequestHandler):
             ]
         self.send_header("Content-type", "application/json")
         self.end_headers()
-        self.wfile.write(json.dumps(api_response, indent=4))
+        byt = json.dumps(api_response, indent=4).encode()
+        self.wfile.write(byt)
 
     # todo
     def do_post(self):
