@@ -3,7 +3,7 @@ FROM debian:stretch-slim
 RUN apt-get -y update
 
 # Install Python
-RUN apt-get -y install python
+RUN apt-get -y install python3
 RUN apt-get -y install apt-transport-https
 RUN apt-get -y install curl
 RUN apt-get -y install gnupg2
@@ -29,10 +29,15 @@ RUN git checkout releases
 RUN grafana-cli plugins install natel-discrete-panel
 
 # Install Tesla API Scraper
-RUN apt-get -y install python-pip
+RUN apt-get -y install python3-pip
 WORKDIR /
 RUN git clone https://github.com/freerobby/tesla-apiscraper
 RUN pip install influxdb
+
+RUN git clone https://github.com/tkrajina/srtm.py
+WORKDIR srtm.py
+RUN python3 ./setup.py install
+WORKDIR /
 
 # Configure it
 WORKDIR tesla-apiscraper
@@ -65,8 +70,8 @@ RUN service influxdb start && \
   service grafana-server stop && \
   service influxdb stop
 
-RUN sed -i "s/a_influxpass = '<influxdbpassword>'/a_influxpass = None/g" /tesla-apiscraper/config.py
-RUN sed -i "s/a_influxuser = 'tesla'/a_influxuser = None/g" /tesla-apiscraper/config.py
+RUN sed -i "s/a_influxpass = '<influxdbpassword>'/a_influx_pass = None/g" /tesla-apiscraper/config.py
+RUN sed -i "s/a_influxuser = 'tesla'/a_influx_user = None/g" /tesla-apiscraper/config.py
 
 # Define our startup script
 RUN echo "#!/bin/bash" > /start.sh
@@ -74,7 +79,7 @@ RUN echo "sed -i \"s/<email>/\${TESLA_USERNAME}/g\" /tesla-apiscraper/config.py"
 RUN echo "sed -i \"s/<password>/\${TESLA_PASSWORD}/g\" /tesla-apiscraper/config.py" >> /start.sh
 RUN echo "service influxdb start" >> /start.sh
 RUN echo "service grafana-server start" >> /start.sh
-RUN echo "python /tesla-apiscraper/apiscraper.py" >> /start.sh
+RUN echo "python3 /tesla-apiscraper/apiscraper.py" >> /start.sh
 RUN chmod +x /start.sh
 
 # Run it
