@@ -11,6 +11,8 @@ This can be hosted on any System that's capable of running InfluxDB, Grafana and
 
 The App is available on [here on Google Play](https://play.google.com/store/apps/details?id=to.mephis.apiscrapercontrol)
 
+The current App Version is 1.2.7
+
 ## Features
 
 - Capable of handling multiple Vehicles in one Tesla Account
