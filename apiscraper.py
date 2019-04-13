@@ -348,7 +348,7 @@ class ApiHandler(BaseHTTPRequestHandler):
         self.wfile.write(byt)
 
     # todo
-    def do_post(self):
+    def do_POST(self):
         if self.path == "/switch" and self.headers.get('apikey') == a_api_key:
             content_length = int(self.headers['Content-Length'])
             body = self.rfile.read(content_length)
