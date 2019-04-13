@@ -1,6 +1,8 @@
 # tesla-apiscraper
 Selfhosted API Scraper for pulling Vehicle Telemetry from the Tesla Owner API into an InfluxDB visualisation on Grafana Dashboards.
 
+Known to work with Model S, X and 3.
+
 _Current Release: v2019.3_
 
 **Putting an end to __handing out the Key__ for your 100+ Grand Car to a third party you don't know.**
@@ -26,7 +28,10 @@ The current App Version is 1.2.7
 
 ## Installation:
 
+We updated to Python3 since Python2 is being phased out soon. Python2 is unsupported as of now.
+
 - Install Python3
+
 
 eg:
 ```
@@ -83,19 +88,6 @@ There you can change $rangeunit "km" to "mi" and $rangefactor 1.60934 to 1.0 and
 git clone https://github.com/lephisto/tesla-apiscraper
 ```
 
-- Always pick a release
-
-eg:
-```
-git checkout v2019.2
-```
-
-- Get Python InfluxDB Module
-
-```
-pip install influxdb
-```
-
 - Install requirements for Elevation Calculation
 
 ```
@@ -110,9 +102,21 @@ Important:
 rm -rf srtm.py  
 ```
 
+
+- Always pick a release
+
+eg:
+```
+cd tesla-apiscraper
+git checkout v2019.2
+```
+
+
+
 - Configure API Scraper
 
 ```
+cd tesla-apiscraper
 cp config.py.dist config.py
 vim config.py
 ```
@@ -123,7 +127,7 @@ Set Tesla and Influxdb Credentials there.
 Afterwards start the Scraping:
 
 ```
-python3 apiscraper.py
+python3 ./apiscraper.py
 ```
 
 Once you know everything is running fine you can start the scraper to keep running with screen or tmux, or feel free to write down a systemd service definition file.
