@@ -353,7 +353,9 @@ class ApiHandler(BaseHTTPRequestHandler):
         if self.path == "/switch" and self.headers.get('apikey') == a_api_key:
             content_length = int(self.headers['Content-Length'])
             body = self.rfile.read(content_length)
-            post_command = json.loads(body).decode();
+            data = json.loads(body);
+            data.decode();
+            post_command = data;
             if post_command['command'] is not None:
                 self.send_response(200)
                 self.server.condition.acquire()
