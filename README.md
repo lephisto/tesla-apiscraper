@@ -3,7 +3,7 @@ Selfhosted API Scraper for pulling Vehicle Telemetry from the Tesla Owner API in
 
 Known to work with Model S, X and 3.
 
-_Current Release: v2019.3_
+_Current Release: v2019.4_
 
 **Putting an end to __handing out the Key__ for your 100+ Grand Car to a third party you don't know.**
 
@@ -13,7 +13,7 @@ This can be hosted on any System that's capable of running InfluxDB, Grafana and
 
 The App is available on [here on Google Play](https://play.google.com/store/apps/details?id=to.mephis.apiscrapercontrol)
 
-The current App Version is 1.2.7
+The current App Version is 1.2.8
 
 ## Features
 
@@ -52,13 +52,16 @@ Additionally I suggest you to setup authentication or close the InfluxDB Port wi
 
 - Install Grafana as in http://docs.grafana.org/installation/debian/
 
-- Get Grafana grafana-trackmap-panel
+- Get Grafana grafana-trackmap-panel (and required node package manager)
 
 ```
+apt install npm
 cd /var/lib/grafana/plugins
-git clone https://github.com/pR0Ps/grafana-trackmap-panel
+git clone https://github.com/lephisto/grafana-trackmap-panel
 cd grafana-trackmap-panel
-git checkout releases
+git checkout v2.0.4-teslascraper
+npm install
+npm run build
 ```
 
 - Get Grafana natel-discrete-panel
