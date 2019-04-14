@@ -16,6 +16,15 @@ a_resolve_elevation = True  # Resolve Coordinates to Elevation. Will Autodownloa
 
 # Logging
 a_logfile = 'apiscraper.log'  # APIScraper Logfile
+#CRITICAL = 50
+#FATAL = CRITICAL
+#ERROR = 40
+#WARNING = 30
+#WARN = WARNING
+#INFO = 20
+#DEBUG = 10
+#NOTSET = 0
+a_loglevel = 20               #Loglevel
 
 # Influx DB Credentials
 a_influx_host = 'localhost'  # InfluxDB Host
