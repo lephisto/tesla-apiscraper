@@ -24,7 +24,7 @@ a_logfile = 'apiscraper.log'  # APIScraper Logfile
 #INFO = 20
 #DEBUG = 10
 #NOTSET = 0
-a_loglevel = 20               #Loglevel
+a_loglevel = 10               #Loglevel
 
 # Influx DB Credentials
 a_influx_host = 'localhost'  # InfluxDB Host
