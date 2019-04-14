@@ -460,8 +460,7 @@ while True:
                 "measurement": 'vehicle_state',
                 "tags": {
                     "vin": state_monitor.vehicle['vin'],
-                    "display_name": state_monitor.vehicle['display_name'],
-                    "metric": 'state'
+                    "display_name": state_monitor.vehicle['display_name']
                 },
                 "time": ts,
                 "fields": {
