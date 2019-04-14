@@ -183,6 +183,16 @@ class StateMonitor(object):
             if self.old_values[request].get('timestamp', '') == timestamp:
                 break
             self.old_values[request]['timestamp'] = timestamp
+            json_body = {
+                "measurement": request,
+                "tags": {
+                    "vin": a_vin,
+                    "display_name": a_display_name,
+                },
+                "fields": {
+                },
+                "time": int(timestamp) * 1000000,
+            }
             for element in sorted(result):
                 if element not in (
                         "timestamp", "gps_as_of", "left_temp_direction", "right_temp_direction", "charge_port_latch"):
@@ -216,22 +226,8 @@ class StateMonitor(object):
                             any_change = True
                         if new_value is not None:
                             if element not in a_ignore:
-                                json_body = [
-                                    {
-                                        "measurement": request,
-                                        "tags": {
-                                            "vin": a_vin,
-                                            "display_name": a_display_name,
-                                            "metric": element
-                                        },
-                                        "time": int(timestamp) * 1000000000,
-                                        "fields": {
-                                            element: new_value
-                                        }
-                                    }
-                                ]
-                                if not a_dry_run:
-                                    influx_client.write_points(json_body)
+                                row = { element: new_value }
+                                json_body["fields"].update(row)
                         self.old_values[request][element] = new_value
                 if a_lat is not None and a_long is not None and a_resolve_elevation:
                     # Fire and forget Elevation retrieval..
@@ -246,6 +242,10 @@ class StateMonitor(object):
                         elevator.start()
                     a_lat = None
                     a_long = None
+
+            if not a_dry_run and len(json_body["fields"])>0:
+                logger.info("Writing Points to Influx: " + json_body["measurement"])
+                influx_client.write_points([json_body])
         return any_change
 
     def check_states(self, interval):
