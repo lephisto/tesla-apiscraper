@@ -146,14 +146,18 @@ Alternatively, you can build and run tesla-apiscraper via Docker.
 To build, run:
 
 ```
+mkdir -p /opt/apiscraper/influxdb
 docker build ./ -t tesla-apiscraper
 ```
 
 To run it, use:
 
 ```
-docker run -p 3000:3000 -e "TESLA_USERNAME=<your tesla email>" -e "TESLA_PASSWORD=<your tesla password>" tesla-apiscraper:latest
+docker run -p 3000:3000 -p 8023:8023 -v /opt/apiscraper/influxdb:/var/lib/influxdb -e "TESLA_USERNAME=<your tesla email>" -e "TESLA_PASSWORD=<your tesla password>" tesla-apiscraper:latest
 ```
+
+In this case the timeseries data will persist in /opt/apiscraper/influxdb on your Dockerhost. Feel free to adjust to your needs. 
+
 ## Using the API for the Scraper App for android
 
 There's a little Android App, that can help you letting your car sleep and immidiately turn on scraping when needed. You need to uncomment and configure the follwing Values for it in config.py:
@@ -165,6 +169,17 @@ a_apiport = 8023
 ```
 
 I strongly recommend to put all this behind a reverse Proxy, probably with HTTP Basic authentication in addition to the API Key.
+
+An exmple Apache Reverseproxy configuration would look like:
+
+```        
+#Apiscraper
+ProxyPass /scraperapi http://localhost:8023
+ProxyPassReverse /scraperapi http://localhost:8023
+#Grafana
+ProxyPass /grafana http://localhost:3000
+ProxyPassReverse /grafana http://localhost:3000
+```
 
 ## Known Limitations and issues
 
