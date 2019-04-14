@@ -28,7 +28,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.error import URLError
 
 from influxdb import InfluxDBClient
-from urllib3.exceptions import HTTPError
+# from urllib3.exceptions import HTTPError
 
 import teslajson
 from config import *
@@ -49,11 +49,11 @@ disableScrape = a_start_disabled
 disabled_since = 0
 busy_since = 0
 car_active_state = None
-lastdatafromtesla = None
+last_data_from_tesla = None
 resume = False
 
 # DON'T CHANGE ANYTHING BELOW
-scraperapi_version = 2019.3
+scraper_api_version = 2019.4
 
 influx_client = InfluxDBClient(
     a_influx_host, a_influx_port, a_influx_user, a_influx_pass, a_influx_db)
@@ -67,7 +67,7 @@ def setup_custom_logger(name):
     screen_handler = logging.StreamHandler(stream=sys.stdout)
     screen_handler.setFormatter(formatter)
     custom_logger = logging.getLogger(name)
-    custom_logger.setLevel(logging.DEBUG)
+    custom_logger.setLevel(a_loglevel)
     custom_logger.addHandler(handler)
     custom_logger.addHandler(screen_handler)
     return custom_logger
@@ -165,12 +165,12 @@ class StateMonitor(object):
         global a_vin
         global a_display_name
         global a_ignore
-        global lastdatafromtesla
+        global last_data_from_tesla
         a_lat = None
         a_long = None
         # Request and process all Tesla states
         any_change = False
-        logger.info(">> Request vehicle data")
+        logger.debug(">> Request vehicle data")
         r = self.vehicle.get("vehicle_data")
 
         self.update_vehicle_from_response(r['response'])
@@ -179,7 +179,7 @@ class StateMonitor(object):
             header_printed = False
             result = r['response'][request]
             timestamp = result['timestamp']
-            lastdatafromtesla = timestamp
+            last_data_from_tesla = timestamp
             if self.old_values[request].get('timestamp', '') == timestamp:
                 break
             self.old_values[request]['timestamp'] = timestamp
@@ -197,7 +197,7 @@ class StateMonitor(object):
                     if new_value and old_value and ((element == "inside_temp") or (element == "outside_temp")):
                         if abs(new_value - old_value) < 1.0:
                             new_value = old_value
-                            logger.info(
+                            logger.debug(
                                 "Only minimal temperature difference received. No change registered to avoid wakelock.")
                     if new_value and old_value and (
                             (element == "battery_range") or
@@ -206,15 +206,12 @@ class StateMonitor(object):
                     ):
                         if abs(new_value - old_value) < 0.5:
                             new_value = old_value
-                            logger.info(
+                            logger.debug(
                                 "Only minimal range difference received. No change registered to avoid wakelock.")
                     if (old_value == '') or ((new_value is not None) and (new_value != old_value)):
-                        logger.info("Value Change, SG: " + request + ": Logging..." + element +
+                        logger.debug("Value Change, SG: " + request + ": Logging..." + element +
                                     ": old value: " + str(old_value) + ", new value: " + str(new_value))
                         if not header_printed:
-                            timestamp = None
-                            if "timestamp" in result:
-                                timestamp = result["timestamp"] / 1000
                             header_printed = True
                             any_change = True
                         if new_value is not None:
@@ -238,11 +235,11 @@ class StateMonitor(object):
                         self.old_values[request][element] = new_value
                 if a_lat is not None and a_long is not None and a_resolve_elevation:
                     # Fire and forget Elevation retrieval..
-                    print("starting thread elevator: " + str(a_lat) + "/" + str(a_long) + "/" + str(timestamp))
+                    logger.debug("starting thread elevator: " + str(a_lat) + "/" + str(a_long) + "/" + str(timestamp))
                     elevator = threading.Thread(target=elevationtoinflux,
                                                 args=(
                                                     a_lat, a_long, a_vin, a_display_name,
-                                                    timestamp, influx_client, a_dry_run))
+                                                    timestamp, influx_client, a_dry_run, logger))
                     # elevator.daemon = True
                     elevator.setName("elevator")
                     if not elevator.is_alive():
@@ -301,12 +298,14 @@ class StateMonitor(object):
         return interval
 
 
+'''
 def last_state_report(f_vin):
     raw_query = "select time,state from vehicle_state where metric='state' and vin='{}' order by time desc limit 1"
     query = raw_query.format(f_vin)
     influx_result = influx_client.query(query)
     point = list(influx_result.get_points(measurement='vehicle_state'))
     return point[0]
+'''
 
 
 # HTTP Thread Handler
@@ -329,14 +328,14 @@ class ApiHandler(BaseHTTPRequestHandler):
                 {
                     "result": "ok",
                     "vin": a_vin,
-                    "scraperapiversion": scraperapi_version,
+                    "scraperapiversion": scraper_api_version,
                     "displayname": a_display_name,
                     "state": is_asleep,
                     "disablescraping": disableScrape,
                     "carstate": car_active_state,
                     "disabled_since": disabled_since,
                     "interval": poll_interval,
-                    "lastdatafromtesla": int(lastdatafromtesla/1000),
+                    "lastdatafromtesla": int(last_data_from_tesla/1000),
                     "busy": processing_time
                 }
             ]
@@ -381,7 +380,7 @@ class QueuingHTTPServer(HTTPServer):
 def run_server(port, pq, cond):
     httpd = QueuingHTTPServer(('0.0.0.0', port), ApiHandler, pq, cond)
     while True:
-        print("HANDLE: " + threading.current_thread().name)
+        logger.debug("HANDLE: " + threading.current_thread().name)
         httpd.handle_request()
 
 
@@ -438,7 +437,6 @@ while True:
                 state_monitor.wake_up()
                 resume = True
 
-    logger.info("DisableScrape: " + str(disableScrape) + ", car_active_state: " + str(car_active_state))
     if disableScrape is False or car_active_state is not None:
         busy_since = int(time.time())
         # We cannot be sleeping with small poll interval for sure.
@@ -473,10 +471,10 @@ while True:
         ]
         if not a_dry_run:
             influx_client.write_points(state_body)
-        logger.info("Car State: " + is_asleep +
+        logger.debug("Car State: " + is_asleep +
                     " Poll Interval: " + str(poll_interval))
         if is_asleep == 'asleep' and a_allow_sleep == 1:
-            logger.info("Car is probably asleep, we let it sleep...")
+            logger.debug("Car is probably asleep, we let it sleep...")
             poll_interval = 64
 
         if poll_interval >= 0:
