@@ -76,11 +76,11 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
-  "iteration": 1555239415383,
+  "iteration": 1555263704591,
   "links": [],
   "panels": [
     {
-      "collapsed": false,
+      "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -88,116 +88,124 @@
         "y": 0
       },
       "id": 68,
-      "panels": [],
+      "panels": [
+        {
+          "autoZoom": true,
+          "datasource": "${DS_TESLA}",
+          "gridPos": {
+            "h": 14,
+            "w": 24,
+            "x": 0,
+            "y": 1
+          },
+          "id": 70,
+          "lineColor": "red",
+          "links": [],
+          "maxDataPoints": 50000,
+          "pointColor": "royalblue",
+          "scopedVars": {
+            "vehicle_name": {
+              "selected": true,
+              "text": "Ulysses",
+              "value": "Ulysses"
+            }
+          },
+          "scrollWheelZoom": true,
+          "targets": [
+            {
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "linear"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "measurement": "drive_state",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "native_latitude"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "display_name",
+                  "operator": "=~",
+                  "value": "/^$vehicle_name$/"
+                }
+              ]
+            },
+            {
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "linear"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "measurement": "drive_state",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "refId": "B",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "native_longitude"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "display_name",
+                  "operator": "=~",
+                  "value": "/^$vehicle_name$/"
+                }
+              ]
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Geolocation",
+          "type": "pr0ps-trackmap-panel"
+        }
+      ],
       "repeat": "vehicle_name",
       "title": "Geolocation $vehicle_name",
       "type": "row"
-    },
-    {
-      "autoZoom": true,
-      "datasource": "${DS_TESLA}",
-      "gridPos": {
-        "h": 14,
-        "w": 24,
-        "x": 0,
-        "y": 1
-      },
-      "id": 70,
-      "lineColor": "red",
-      "links": [],
-      "maxDataPoints": 50000,
-      "pointColor": "royalblue",
-      "scrollWheelZoom": true,
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "linear"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "drive_state",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "native_latitude"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "display_name",
-              "operator": "=~",
-              "value": "/^$vehicle_name$/"
-            }
-          ]
-        },
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "linear"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "drive_state",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "native_longitude"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "display_name",
-              "operator": "=~",
-              "value": "/^$vehicle_name$/"
-            }
-          ]
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Geolocation",
-      "type": "pr0ps-trackmap-panel"
     },
     {
       "collapsed": false,
@@ -205,7 +213,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 1
       },
       "id": 4,
       "panels": [],
@@ -234,7 +242,7 @@
         "h": 5,
         "w": 4,
         "x": 0,
-        "y": 16
+        "y": 2
       },
       "id": 2,
       "interval": null,
@@ -340,7 +348,7 @@
         "h": 5,
         "w": 10,
         "x": 4,
-        "y": 16
+        "y": 2
       },
       "id": 8,
       "legend": {
@@ -494,7 +502,7 @@
         "h": 3,
         "w": 3,
         "x": 14,
-        "y": 16
+        "y": 2
       },
       "id": 16,
       "interval": null,
@@ -618,7 +626,7 @@
         "h": 3,
         "w": 3,
         "x": 17,
-        "y": 16
+        "y": 2
       },
       "id": 14,
       "interval": null,
@@ -730,7 +738,7 @@
         "h": 3,
         "w": 2,
         "x": 20,
-        "y": 16
+        "y": 2
       },
       "id": 18,
       "interval": null,
@@ -853,7 +861,7 @@
         "h": 3,
         "w": 2,
         "x": 22,
-        "y": 16
+        "y": 2
       },
       "id": 20,
       "interval": null,
@@ -965,7 +973,7 @@
         "h": 4,
         "w": 10,
         "x": 14,
-        "y": 19
+        "y": 5
       },
       "id": 12,
       "legend": {
@@ -1140,7 +1148,7 @@
         "h": 5,
         "w": 4,
         "x": 0,
-        "y": 21
+        "y": 7
       },
       "id": 6,
       "interval": null,
@@ -1240,7 +1248,7 @@
         "h": 5,
         "w": 10,
         "x": 4,
-        "y": 21
+        "y": 7
       },
       "id": 10,
       "legend": {
@@ -1397,7 +1405,7 @@
         "h": 3,
         "w": 10,
         "x": 14,
-        "y": 23
+        "y": 9
       },
       "highlightOnMouseover": true,
       "id": 22,
@@ -1554,7 +1562,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 12
       },
       "hideTimeOverride": false,
       "highlightOnMouseover": true,
@@ -1716,7 +1724,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 16
       },
       "id": 26,
       "panels": [
@@ -3370,6 +3378,175 @@
           "valueFontSize": "80%",
           "valueMaps": [],
           "valueName": "current"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "${DS_TESLA}",
+          "fill": 1,
+          "gridPos": {
+            "h": 5,
+            "w": 17,
+            "x": 7,
+            "y": 18
+          },
+          "id": 74,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "scopedVars": {
+            "vehicle_name": {
+              "selected": true,
+              "text": "Ulysses",
+              "value": "Ulysses"
+            }
+          },
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "alias": "Projected 100% Range (rated)",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "hide": false,
+              "measurement": "charge_state",
+              "orderByTime": "ASC",
+              "policy": "default",
+              "query": " select ((BR/BL)*100) from (select mean(battery_range) as BR ,mean(battery_level) as BL from charge_state group by time($__interval) fill(linear)) ",
+              "rawQuery": true,
+              "refId": "A",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "est_battery_range"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": [
+                {
+                  "key": "display_name",
+                  "operator": "=~",
+                  "value": "/^$vehicle_name$/"
+                }
+              ]
+            },
+            {
+              "alias": "Projected 100% Range (est)",
+              "groupBy": [
+                {
+                  "params": [
+                    "$__interval"
+                  ],
+                  "type": "time"
+                },
+                {
+                  "params": [
+                    "null"
+                  ],
+                  "type": "fill"
+                }
+              ],
+              "orderByTime": "ASC",
+              "policy": "default",
+              "query": " select ((BR/BL)*100) from (select mean(est_battery_range) as BR ,mean(battery_level) as BL from charge_state group by time($__interval) fill(linear)) ",
+              "rawQuery": true,
+              "refId": "B",
+              "resultFormat": "time_series",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "field"
+                  },
+                  {
+                    "params": [],
+                    "type": "mean"
+                  }
+                ]
+              ],
+              "tags": []
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Projected Range ",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
         }
       ],
       "repeat": "vehicle_name",
@@ -3382,7 +3559,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 17
       },
       "id": 50,
       "panels": [
@@ -4315,6 +4492,7 @@
       "type": "row"
     }
   ],
+  "refresh": false,
   "schemaVersion": 18,
   "style": "dark",
   "tags": [],
@@ -4486,5 +4664,5 @@
   "timezone": "",
   "title": "Tesla Metrics V2",
   "uid": "RfV_d0RWk",
-  "version": 55
+  "version": 58
 }
