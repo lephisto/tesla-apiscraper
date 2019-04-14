@@ -76,11 +76,11 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
-  "iteration": 1555234320799,
+  "iteration": 1555239415383,
   "links": [],
   "panels": [
     {
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -88,116 +88,116 @@
         "y": 0
       },
       "id": 68,
-      "panels": [
-        {
-          "autoZoom": true,
-          "datasource": "${DS_TESLA}",
-          "gridPos": {
-            "h": 14,
-            "w": 24,
-            "x": 0,
-            "y": 1
-          },
-          "id": 70,
-          "lineColor": "red",
-          "links": [],
-          "maxDataPoints": 50000,
-          "pointColor": "royalblue",
-          "targets": [
-            {
-              "groupBy": [
-                {
-                  "params": [
-                    "$__interval"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "linear"
-                  ],
-                  "type": "fill"
-                }
-              ],
-              "measurement": "drive_state",
-              "orderByTime": "ASC",
-              "policy": "default",
-              "refId": "A",
-              "resultFormat": "time_series",
-              "select": [
-                [
-                  {
-                    "params": [
-                      "native_latitude"
-                    ],
-                    "type": "field"
-                  },
-                  {
-                    "params": [],
-                    "type": "mean"
-                  }
-                ]
-              ],
-              "tags": [
-                {
-                  "key": "display_name",
-                  "operator": "=~",
-                  "value": "/^$vehicle_name$/"
-                }
-              ]
-            },
-            {
-              "groupBy": [
-                {
-                  "params": [
-                    "$__interval"
-                  ],
-                  "type": "time"
-                },
-                {
-                  "params": [
-                    "linear"
-                  ],
-                  "type": "fill"
-                }
-              ],
-              "measurement": "drive_state",
-              "orderByTime": "ASC",
-              "policy": "default",
-              "refId": "B",
-              "resultFormat": "time_series",
-              "select": [
-                [
-                  {
-                    "params": [
-                      "native_longitude"
-                    ],
-                    "type": "field"
-                  },
-                  {
-                    "params": [],
-                    "type": "mean"
-                  }
-                ]
-              ],
-              "tags": [
-                {
-                  "key": "display_name",
-                  "operator": "=~",
-                  "value": "/^$vehicle_name$/"
-                }
-              ]
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Geolocation",
-          "type": "pr0ps-trackmap-panel"
-        }
-      ],
+      "panels": [],
       "repeat": "vehicle_name",
       "title": "Geolocation $vehicle_name",
       "type": "row"
+    },
+    {
+      "autoZoom": true,
+      "datasource": "${DS_TESLA}",
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "id": 70,
+      "lineColor": "red",
+      "links": [],
+      "maxDataPoints": 50000,
+      "pointColor": "royalblue",
+      "scrollWheelZoom": true,
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "linear"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "drive_state",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "native_latitude"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
+            }
+          ]
+        },
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "linear"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "drive_state",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "native_longitude"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "display_name",
+              "operator": "=~",
+              "value": "/^$vehicle_name$/"
+            }
+          ]
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Geolocation",
+      "type": "pr0ps-trackmap-panel"
     },
     {
       "collapsed": false,
@@ -205,7 +205,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 1
+        "y": 15
       },
       "id": 4,
       "panels": [],
@@ -234,7 +234,7 @@
         "h": 5,
         "w": 4,
         "x": 0,
-        "y": 2
+        "y": 16
       },
       "id": 2,
       "interval": null,
@@ -340,7 +340,7 @@
         "h": 5,
         "w": 10,
         "x": 4,
-        "y": 2
+        "y": 16
       },
       "id": 8,
       "legend": {
@@ -391,7 +391,7 @@
           "measurement": "drive_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"speed\") * $rangefactor FROM \"drive_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/ ) AND $timeFilter GROUP BY time($__interval) fill(previous)",
+          "query": "SELECT mean(\"speed\") * $rangefactor FROM \"drive_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/ ) AND $timeFilter GROUP BY time($__interval) fill(0)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -494,7 +494,7 @@
         "h": 3,
         "w": 3,
         "x": 14,
-        "y": 2
+        "y": 16
       },
       "id": 16,
       "interval": null,
@@ -618,7 +618,7 @@
         "h": 3,
         "w": 3,
         "x": 17,
-        "y": 2
+        "y": 16
       },
       "id": 14,
       "interval": null,
@@ -730,7 +730,7 @@
         "h": 3,
         "w": 2,
         "x": 20,
-        "y": 2
+        "y": 16
       },
       "id": 18,
       "interval": null,
@@ -853,7 +853,7 @@
         "h": 3,
         "w": 2,
         "x": 22,
-        "y": 2
+        "y": 16
       },
       "id": 20,
       "interval": null,
@@ -965,7 +965,7 @@
         "h": 4,
         "w": 10,
         "x": 14,
-        "y": 5
+        "y": 19
       },
       "id": 12,
       "legend": {
@@ -1140,7 +1140,7 @@
         "h": 5,
         "w": 4,
         "x": 0,
-        "y": 7
+        "y": 21
       },
       "id": 6,
       "interval": null,
@@ -1240,7 +1240,7 @@
         "h": 5,
         "w": 10,
         "x": 4,
-        "y": 7
+        "y": 21
       },
       "id": 10,
       "legend": {
@@ -1290,7 +1290,7 @@
           "measurement": "drive_state",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"power\") FROM \"drive_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/) AND $timeFilter GROUP BY time($__interval) fill(previous)",
+          "query": "SELECT mean(\"power\") FROM \"drive_state\" WHERE (\"display_name\" =~ /^$vehicle_name$/) AND $timeFilter GROUP BY time($__interval) fill(0)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1397,7 +1397,7 @@
         "h": 3,
         "w": 10,
         "x": 14,
-        "y": 9
+        "y": 23
       },
       "highlightOnMouseover": true,
       "id": 22,
@@ -1554,7 +1554,7 @@
         "h": 4,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 26
       },
       "hideTimeOverride": false,
       "highlightOnMouseover": true,
@@ -1716,7 +1716,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 30
       },
       "id": 26,
       "panels": [
@@ -3140,6 +3140,13 @@
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
+          "scopedVars": {
+            "vehicle_name": {
+              "selected": true,
+              "text": "Ulysses",
+              "value": "Ulysses"
+            }
+          },
           "seriesOverrides": [],
           "spaceLength": 10,
           "stack": false,
@@ -3375,7 +3382,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 31
       },
       "id": 50,
       "panels": [
@@ -4479,5 +4486,5 @@
   "timezone": "",
   "title": "Tesla Metrics V2",
   "uid": "RfV_d0RWk",
-  "version": 52
+  "version": 55
 }
