@@ -3,7 +3,7 @@ Selfhosted API Scraper for pulling Vehicle Telemetry from the Tesla Owner API in
 
 Known to work with Model S, X and 3.
 
-_Current Release: v2019.3_
+_Current Release: v2019.4_
 
 **Putting an end to __handing out the Key__ for your 100+ Grand Car to a third party you don't know.**
 
@@ -13,7 +13,7 @@ This can be hosted on any System that's capable of running InfluxDB, Grafana and
 
 The App is available on [here on Google Play](https://play.google.com/store/apps/details?id=to.mephis.apiscrapercontrol)
 
-The current App Version is 1.2.7
+The current App Version is 1.2.8
 
 ## Features
 
@@ -52,13 +52,16 @@ Additionally I suggest you to setup authentication or close the InfluxDB Port wi
 
 - Install Grafana as in http://docs.grafana.org/installation/debian/
 
-- Get Grafana grafana-trackmap-panel
+- Get Grafana grafana-trackmap-panel (and required node package manager)
 
 ```
+apt install npm
 cd /var/lib/grafana/plugins
-git clone https://github.com/pR0Ps/grafana-trackmap-panel
+git clone https://github.com/lephisto/grafana-trackmap-panel
 cd grafana-trackmap-panel
-git checkout releases
+git checkout v2.0.4-teslascraper
+npm install
+npm run build
 ```
 
 - Get Grafana natel-discrete-panel
@@ -143,14 +146,18 @@ Alternatively, you can build and run tesla-apiscraper via Docker.
 To build, run:
 
 ```
+mkdir -p /opt/apiscraper/influxdb
 docker build ./ -t tesla-apiscraper
 ```
 
 To run it, use:
 
 ```
-docker run -p 3000:3000 -e "TESLA_USERNAME=<your tesla email>" -e "TESLA_PASSWORD=<your tesla password>" tesla-apiscraper:latest
+docker run -p 3000:3000 -p 8023:8023 -v /opt/apiscraper/influxdb:/var/lib/influxdb -e "TESLA_USERNAME=<your tesla email>" -e "TESLA_PASSWORD=<your tesla password>" tesla-apiscraper:latest
 ```
+
+In this case the timeseries data will persist in /opt/apiscraper/influxdb on your Dockerhost. Feel free to adjust to your needs. 
+
 ## Using the API for the Scraper App for android
 
 There's a little Android App, that can help you letting your car sleep and immidiately turn on scraping when needed. You need to uncomment and configure the follwing Values for it in config.py:
@@ -162,6 +169,17 @@ a_apiport = 8023
 ```
 
 I strongly recommend to put all this behind a reverse Proxy, probably with HTTP Basic authentication in addition to the API Key.
+
+An exmple Apache Reverseproxy configuration would look like:
+
+```        
+#Apiscraper
+ProxyPass /scraperapi http://localhost:8023
+ProxyPassReverse /scraperapi http://localhost:8023
+#Grafana
+ProxyPass /grafana http://localhost:3000
+ProxyPassReverse /grafana http://localhost:3000
+```
 
 ## Known Limitations and issues
 
