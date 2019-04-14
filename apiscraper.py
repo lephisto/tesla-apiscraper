@@ -28,7 +28,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.error import URLError
 
 from influxdb import InfluxDBClient
-# from urllib3.exceptions import HTTPError
+from urllib3.exceptions import HTTPError
 
 import teslajson
 from config import *
