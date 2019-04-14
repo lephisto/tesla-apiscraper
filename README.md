@@ -22,9 +22,13 @@ The current App Version is 1.2.8
 
 ## Screenshots
 
-![Driving Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/driving_dash.png)
+![Driving Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/teslametrics_v2_1.png)
 
-![Charging Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/charging_dash.png)
+![Charging Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/teslametrics_v2_2.png)
+
+Projected 100% Range:
+
+![Projected Graph](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/teslametrics_v2_3.png)
 
 ## Installation:
 
@@ -111,7 +115,7 @@ rm -rf srtm.py
 eg:
 ```
 cd tesla-apiscraper
-git checkout v2019.2
+git checkout v2019.4
 ```
 
 
