@@ -20,19 +20,26 @@ RUN echo "deb https://packages.grafana.com/oss/deb stable main" | tee /etc/apt/s
 RUN apt-get -y update
 RUN apt-get -y install grafana
 
+# Install Node
+RUN curl -sL https://deb.nodesource.com/setup_11.x | bash -
+RUN apt-get install -y nodejs
+
 # Install Grafana addons
 RUN apt-get -y install git
 WORKDIR /var/lib/grafana/plugins
-RUN git clone https://github.com/pR0Ps/grafana-trackmap-panel
+RUN git clone https://github.com/lephisto/grafana-trackmap-panel
 WORKDIR /var/lib/grafana/plugins/grafana-trackmap-panel
-RUN git checkout releases
+RUN git checkout v2.0.4-teslascraper
+RUN npm install
+RUN npm audit fix
+RUN npm run build
 RUN grafana-cli plugins install natel-discrete-panel
 
 # Install Tesla API Scraper
 RUN apt-get -y install python3-pip
 WORKDIR /
-RUN git clone https://github.com/freerobby/tesla-apiscraper
-RUN pip install influxdb
+RUN git clone https://github.com/lephisto/tesla-apiscraper
+RUN pip3 install influxdb
 
 RUN git clone https://github.com/tkrajina/srtm.py
 WORKDIR srtm.py
@@ -41,32 +48,23 @@ WORKDIR /
 
 # Configure it
 WORKDIR tesla-apiscraper
+RUN git checkout v2019.4
 RUN cp config.py.dist config.py
 RUN service influxdb start && \
   influx -execute "create database tesla" && \
   service influxdb stop
 
 # Create temp files for dashboard API calls
-RUN echo '{"dashboard":' > /tmp/Charging.json
-RUN echo '{"dashboard":' > /tmp/Climate.json
-RUN echo '{"dashboard":' > /tmp/Driving.json
-RUN cat ./grafana-dashboards/Charging.json >> /tmp/Charging.json
-RUN cat ./grafana-dashboards/Climate.json >> /tmp/Climate.json
-RUN cat ./grafana-dashboards/Driving.json >> /tmp/Driving.json
-RUN echo '}' >> /tmp/Charging.json
-RUN echo '}' >> /tmp/Climate.json
-RUN echo '}' >> /tmp/Driving.json
-RUN sed -i 's/\${DS_TESLA}/InfluxDB/g' /tmp/Charging.json
-RUN sed -i 's/\${DS_TESLA}/InfluxDB/g' /tmp/Climate.json
-RUN sed -i 's/\${DS_TESLA}/InfluxDB/g' /tmp/Driving.json
+RUN echo '{"dashboard":' > /tmp/TeslaMetricsV2.json
+RUN cat ./grafana-dashboards/TeslaMetricsV2.json >> /tmp/TeslaMetricsV2.json
+RUN echo '}' >> /tmp/TeslaMetricsV2.json
+RUN sed -i 's/\${DS_TESLA}/InfluxDB/g' /tmp/TeslaMetricsV2.json
 
 # Install Grafana data source and dashboards
 RUN service influxdb start && \
   service grafana-server start ; sleep 5 && \
   curl -v -H 'Content-Type: application/json' -d @./grafana-datasources/influxdb.json http://admin:admin@localhost:3000/api/datasources && \
-  curl -v -H 'Content-Type: application/json' -d @/tmp/Charging.json http://admin:admin@localhost:3000/api/dashboards/db && \
-  curl -v -H 'Content-Type: application/json' -d @/tmp/Climate.json http://admin:admin@localhost:3000/api/dashboards/db && \
-  curl -v -H 'Content-Type: application/json' -d @/tmp/Driving.json http://admin:admin@localhost:3000/api/dashboards/db && \
+  curl -v -H 'Content-Type: application/json' -d @/tmp/TeslaMetricsV2.json http://admin:admin@localhost:3000/api/dashboards/db && \
   service grafana-server stop && \
   service influxdb stop
 
