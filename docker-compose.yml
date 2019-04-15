@@ -1,0 +1,33 @@
+version: '3'
+
+
+services:
+  influxdb:
+    image: "influxdb:latest"
+    container_name: "influxdb_apiscraper"
+    ports:
+      - "8086:8086"
+    volumes:
+      - /srv/docker/influxdb/data:/var/lib/influxdb
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: "grafana_apiscraper"
+    environment:
+      - GF_INSTALL_PLUGINS=natel-discrete-panel
+    ports:
+      - "3000:3000"
+    links:
+      - influxdb
+    volumes:
+      - /srv/docker/grafana/data:/var/lib/grafana
+      - ./grafana-trackmap-panel/dist:/var/lib/grafana/plugins/grafana-trackmap-panel/
+    depends_on:
+      - requirements
+
+  requirements:
+    image: gabrielaraujof/nodejs-gulp-bower
+    volumes:
+      //todo
+    working_dir:
+    command:
