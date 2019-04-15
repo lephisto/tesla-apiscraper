@@ -167,6 +167,7 @@ Copy config
 ```
 cp config.py.compose config.py
 nano config.py
+touch apiscraper.log
 ```
 
 Create Directories for persistent Data:
