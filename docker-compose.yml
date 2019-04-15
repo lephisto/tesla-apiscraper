@@ -8,8 +8,8 @@ services:
     container_name: "influxdb_apiscraper"
     environment:
       - INFLUXDB_DB="tesla"
-    ports:
-      - "8086:8086"
+#    ports:
+#      - "8086:8086"
     volumes:
       - /opt/apiscraper/influxdb:/var/lib/influxdb
 

@@ -76,7 +76,7 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
-  "iteration": 1555329350470,
+  "iteration": 1555356170664,
   "links": [],
   "panels": [
     {
@@ -1831,7 +1831,7 @@
         }
       ],
       "thresholds": "",
-      "title": "Range",
+      "title": "Current Range",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -2009,7 +2009,7 @@
             },
             {
               "params": [
-                "0"
+                "previous"
               ],
               "type": "fill"
             }
@@ -2226,7 +2226,7 @@
         }
       ],
       "thresholds": "",
-      "title": "Range",
+      "title": "Current Range",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -2338,7 +2338,7 @@
         }
       ],
       "thresholds": "",
-      "title": "Range",
+      "title": "Current Range",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -2529,12 +2529,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "battery_level"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -2580,12 +2574,6 @@
           ],
           "tags": [
             {
-              "key": "metric",
-              "operator": "=",
-              "value": "charge_limit_soc"
-            },
-            {
-              "condition": "AND",
               "key": "display_name",
               "operator": "=~",
               "value": "/^$vehicle_name$/"
@@ -4679,7 +4667,7 @@
     ]
   },
   "time": {
-    "from": "now-2d",
+    "from": "now-30d",
     "to": "now"
   },
   "timepicker": {
@@ -4710,5 +4698,5 @@
   "timezone": "",
   "title": "Tesla Metrics V2",
   "uid": "RfV_d0RWk",
-  "version": 69
+  "version": 78
 }
