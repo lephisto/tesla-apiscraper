@@ -118,14 +118,12 @@ cd tesla-apiscraper
 git checkout v2019.4
 ```
 
-
-
 - Configure API Scraper
 
 ```
 cd tesla-apiscraper
 cp config.py.dist config.py
-vim config.py
+nano config.py
 ```
 
 Set Tesla and Influxdb Credentials there.
@@ -145,22 +143,60 @@ tmux new-session -s apiscraper 'python3 apiscraper.py'
 
 ## Building with Docker
 
-Alternatively, you can build and run tesla-apiscraper via Docker.
+Alternatively, you can build and run tesla-apiscraper via Docker. There are two methods to run Docker stuff: Standalone and docker-compose. I recommand docker-compose in terms of the ability to update components.
 
-To build, run:
+### Standalone (deprecated):
 
 ```
 mkdir -p /opt/apiscraper/influxdb
 docker build ./ -t tesla-apiscraper
 ```
 
-To run it, use:
+Run:
 
 ```
 docker run -p 3000:3000 -p 8023:8023 -v /opt/apiscraper/influxdb:/var/lib/influxdb -e "TESLA_USERNAME=<your tesla email>" -e "TESLA_PASSWORD=<your tesla password>" tesla-apiscraper:latest
 ```
 
-In this case the timeseries data will persist in /opt/apiscraper/influxdb on your Dockerhost. Feel free to adjust to your needs. 
+In this case the timeseries data will persist in /opt/apiscraper/influxdb on your Dockerhost. Feel free to adjust to your needs.
+
+### Docker-Compose
+
+Copy config
+
+```
+cp config.py.compose config.py
+nano config.py
+```
+
+Create Directories for persistent Data:
+
+```
+sudo mkdir -p /opt/apiscraper/influxdb
+sudo mkdir -p /opt/apiscraper/grafana
+sudo chown 472 /opt/apiscraper/grafana
+```
+
+Start Docker Stack
+
+```
+./dashboard2docker.sh
+docker-compose up
+```
+
+to keep the Console detached:
+
+```
+docker-compose up -d
+```
+
+to rebuild the whole Stack:
+
+```
+docker-compose up --force-recreate --build
+```
+
+You can now reach your Grafana Instance at http://localhost:3000
 
 ## Using the API for the Scraper App for android
 

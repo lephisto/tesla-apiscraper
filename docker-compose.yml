@@ -2,32 +2,39 @@ version: '3'
 
 
 services:
+
   influxdb:
     image: "influxdb:latest"
     container_name: "influxdb_apiscraper"
+    environment:
+      - INFLUXDB_DB="tesla"
     ports:
       - "8086:8086"
     volumes:
-      - /srv/docker/influxdb/data:/var/lib/influxdb
+      - /opt/apiscraper/influxdb:/var/lib/influxdb
 
   grafana:
     image: grafana/grafana:latest
     container_name: "grafana_apiscraper"
     environment:
-      - GF_INSTALL_PLUGINS=natel-discrete-panel
+      - GF_INSTALL_PLUGINS=natel-discrete-panel,https://mephis.to/grafana-trackmap-panel/dist.zip;grafana-trackmap-panel
     ports:
       - "3000:3000"
     links:
       - influxdb
+    user: "472"
     volumes:
-      - /srv/docker/grafana/data:/var/lib/grafana
-      - ./grafana-trackmap-panel/dist:/var/lib/grafana/plugins/grafana-trackmap-panel/
-    depends_on:
-      - requirements
+      - /opt/apiscraper/grafana:/var/lib/grafana
+      - ./provisioning/:/etc/grafana/provisioning
 
-  requirements:
-    image: gabrielaraujof/nodejs-gulp-bower
+  apiscraper:
+    container_name: apiscraper
+    build:
+      context: .
+      dockerfile: Dockerfile.compose
     volumes:
-      //todo
-    working_dir:
-    command:
+       - .:/tesla-apiscraper
+    ports:
+      - "8023:8023"
+    depends_on:
+      - influxdb
