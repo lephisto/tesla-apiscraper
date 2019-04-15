@@ -33,7 +33,8 @@ services:
       context: .
       dockerfile: Dockerfile.compose
     volumes:
-       - .:/tesla-apiscraper
+       - ${PWD}/config.py:/tesla-apiscraper/config.py
+       - ${PWD}/apiscraper.log:/tesla-apiscraper/apiscraper.log
     ports:
       - "8023:8023"
     depends_on:
