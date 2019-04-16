@@ -199,6 +199,20 @@ docker-compose up --force-recreate --build
 
 You can now reach your Grafana Instance at http://localhost:3000
 
+#### A note on Docker on the Raspberry Pi:
+
+Raspian comes with a fairly outdated Version of Docker. Get a current one with:
+
+```
+curl -fsSL get.docker.com -o get-docker.sh && sh get-docker.sh
+```
+
+Since there's a glitch in 18.10.* you want to downgrade to docker-ce=18.06.1~ce~3-0~raspbian
+
+```
+apt-get install docker-ce=18.06.1~ce~3-0~raspbian
+```
+
 ## Using the API for the Scraper App for android
 
 There's a little Android App, that can help you letting your car sleep and immidiately turn on scraping when needed. You need to uncomment and configure the follwing Values for it in config.py:
