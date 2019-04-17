@@ -3,7 +3,7 @@ Selfhosted API Scraper for pulling Vehicle Telemetry from the Tesla Owner API in
 
 Known to work with Model S, X and 3.
 
-_Current Release: v2019.4_
+_Current Release: v2019.4.1_
 
 **Putting an end to __handing out the Key__ for your 100+ Grand Car to a third party you don't know.**
 
@@ -115,7 +115,7 @@ rm -rf srtm.py
 eg:
 ```
 cd tesla-apiscraper
-git checkout v2019.4
+git checkout v2019.4.1
 ```
 
 - Configure API Scraper

@@ -24,7 +24,7 @@ WORKDIR /
 
 # Configure it
 WORKDIR tesla-apiscraper
-RUN git checkout v2019.4
+RUN git checkout v2019.4.1
 # Define our startup script
 RUN echo "#!/bin/bash" > /start.sh
 RUN echo "python3 /tesla-apiscraper/apiscraper.py" >> /start.sh
