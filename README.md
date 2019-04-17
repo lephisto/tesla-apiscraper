@@ -167,6 +167,11 @@ Copy config
 ```
 cp config.py.compose config.py
 nano config.py
+```
+
+Important: Create empty Log, otherwise bindmount will fail.
+
+```
 touch apiscraper.log
 ```
 
@@ -205,13 +210,20 @@ Raspian comes with a fairly outdated Version of Docker. Get a current one with:
 
 ```
 curl -fsSL get.docker.com -o get-docker.sh && sh get-docker.sh
+apt-get install docker-compose
 ```
 
-Since there's a glitch in 18.10.* you want to downgrade to docker-ce=18.06.1~ce~3-0~raspbian
+Since you maybe want to handle Docker as non-root User, type:
+```
+usermod -aG docker pi
+reboot
+```
+... adds pi or any other user you would like to the Docker Group.
 
-```
-apt-get install docker-ce=18.06.1~ce~3-0~raspbian
-```
+
+~~Note for Pi Zero Users: Since there's a glitch in 18.10.* on the ArmV6 you want to downgrade to docker-ce=18.06.1~ce~3-0~raspbian~~
+
+This probably won't work on a Pi zero W, since ArmV6 is too weak.
 
 ## Using the API for the Scraper App for android
 
