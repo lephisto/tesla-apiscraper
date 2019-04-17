@@ -38,6 +38,14 @@ a_vin = ""
 a_display_name = ""
 a_ignore = ["media_state", "software_update", "speed_limit_mode"]
 
+a_validity_checks = {
+    "charger_voltage":
+        {
+            "eval": "new_value < 10",
+            "set": 0
+        }
+}
+
 postq = queue.Queue()
 http_condition = threading.Condition()
 
@@ -226,6 +234,11 @@ class StateMonitor(object):
                             any_change = True
                         if new_value is not None:
                             if element not in a_ignore:
+                                if element in a_validity_checks and eval(a_validity_checks[element]["eval"]):
+                                    logger.debug(
+                                        "VALIDITY CHECK VIOLATED >>> " + element + ":" + a_validity_checks[element][
+                                            "eval"])
+                                    new_value = a_validity_checks[element]["set"]
                                 row = { element: new_value }
                                 json_body["fields"].update(row)
                         self.old_values[request][element] = new_value
