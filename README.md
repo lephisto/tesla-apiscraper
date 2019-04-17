@@ -143,7 +143,7 @@ tmux new-session -s apiscraper 'python3 apiscraper.py'
 
 ## Building with Docker
 
-Alternatively, you can build and run tesla-apiscraper via Docker. There are two methods to run Docker stuff: Standalone and docker-compose. I recommand docker-compose in terms of the ability to update components.
+Alternatively, you can build and run tesla-apiscraper via Docker. There are two methods to run Docker stuff: Standalone and docker-compose. I recommend docker-compose in terms of the ability to update components properly.
 
 ### Standalone (deprecated):
 
@@ -174,6 +174,8 @@ Edit your settings, at least put in your MyTesla credentials
 nano config.py
 ```
 
+The configuration is mapped outside the container, so you can conventiently change the Configuration the same way you would without running docker, restart the container and you're good to go. Same goes for the Logfile.
+
 Important: Create empty Log, otherwise bindmount will fail.
 
 ```
@@ -199,6 +201,12 @@ to keep the Console detached:
 
 ```
 docker-compose up -d
+```
+
+to stop the Stack:
+
+```
+docker-compose down
 ```
 
 to rebuild the whole Stack:
