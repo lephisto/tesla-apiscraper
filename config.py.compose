@@ -24,7 +24,7 @@ a_logfile = 'apiscraper.log'                # APIScraper Logfile
 #INFO = 20
 #DEBUG = 10
 #NOTSET = 0
-a_loglevel = 10                             # Loglevel 10: DE
+a_loglevel = 20                             # Loglevel 10: DE
 
 # Influx DB Credentials
 a_influx_host = 'influxdb_apiscraper'       # Set this to influxdb_apiscraper in a Docker environment, otherwise: localhost

@@ -166,6 +166,11 @@ Copy config
 
 ```
 cp config.py.compose config.py
+```
+
+Edit your settings, at least put in your MyTesla credentials
+
+```
 nano config.py
 ```
 
@@ -219,6 +224,14 @@ usermod -aG docker pi
 reboot
 ```
 ... adds pi or any other user you would like to the Docker Group.
+
+Make it start on boot:
+
+```
+cp tesla-apiscraper.service /lib/systemd/system
+sudo systemctl daemon-reload
+sudo systemctl enable tesla-apiscraper.service
+```
 
 
 ~~Note for Pi Zero Users: Since there's a glitch in 18.10.* on the ArmV6 you want to downgrade to docker-ce=18.06.1~ce~3-0~raspbian~~
