@@ -35,5 +35,6 @@ services:
        - ./apiscraper.log:/tesla-apiscraper/apiscraper.log
     ports:
       - "8023:8023"
+    restart: on-failure:5
     depends_on:
       - influxdb
