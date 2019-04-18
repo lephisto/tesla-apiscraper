@@ -30,6 +30,8 @@ services:
   apiscraper:
     container_name: apiscraper
     build:
+      args:
+        gitversion: master
       context: .
       dockerfile: Dockerfile.compose
     volumes:

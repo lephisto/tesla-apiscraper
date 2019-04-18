@@ -212,7 +212,7 @@ docker-compose down
 to rebuild the whole Stack:
 
 ```
-docker-compose build --no-cache
+docker-compose build --build-arg CACHEBUST=$(date +%s) apiscraper
 docker-compose up --force-recreate --build
 ```
 
