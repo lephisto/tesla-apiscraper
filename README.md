@@ -212,6 +212,7 @@ docker-compose down
 to rebuild the whole Stack:
 
 ```
+docker-compose build --no-cache
 docker-compose up --force-recreate --build
 ```
 
