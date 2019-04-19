@@ -117,7 +117,7 @@ class StateMonitor(object):
         # go down to zero too to avoid stale value in the DB.
         if (self.old_values['charge_state'].get('charging_state', '') == "Complete" or self.old_values[
             'charge_state'].get('charging_state', '') == "Stopped") \
-                and (self.old_values['charge_state'].get('charger_voltage', 0) > 0 or self.old_values['charge_state'].get('charger_actual_current', 0) > 0):
+                or self.old_values['charge_state'].get('charger_voltage', 0) > 0 or self.old_values['charge_state'].get('charger_actual_current', 0) > 0:
             return "Charging"
 
         if self.old_values['climate_state'].get('is_climate_on', False):
