@@ -14,7 +14,6 @@ RUN apt-get -y install git
 # Install Tesla API Scraper
 RUN apt-get -y install python3-pip
 WORKDIR /
-RUN git clone https://github.com/lephisto/tesla-apiscraper
 RUN pip3 install influxdb
 
 RUN git clone https://github.com/tkrajina/srtm.py
@@ -22,10 +21,13 @@ WORKDIR srtm.py
 RUN python3 ./setup.py install
 WORKDIR /
 
+ARG CACHEBUST=1
+ARG gitversion
 # Configure it
+RUN git clone https://github.com/lephisto/tesla-apiscraper
 WORKDIR tesla-apiscraper
 RUN git pull
-RUN git checkout v2019.4.1
+RUN git checkout $gitversion
 # Define our startup script
 RUN echo "#!/bin/bash" > /start.sh
 RUN echo "python3 /tesla-apiscraper/apiscraper.py" >> /start.sh

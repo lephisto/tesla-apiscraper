@@ -117,7 +117,7 @@ class StateMonitor(object):
         # go down to zero too to avoid stale value in the DB.
         if (self.old_values['charge_state'].get('charging_state', '') == "Complete" or self.old_values[
             'charge_state'].get('charging_state', '') == "Stopped") \
-                and self.old_values['charge_state'].get('charger_voltage', 0) > 10:
+                or self.old_values['charge_state'].get('charger_voltage', 0) > 0 or self.old_values['charge_state'].get('charger_actual_current', 0) > 0:
             return "Charging"
 
         if self.old_values['climate_state'].get('is_climate_on', False):
@@ -226,7 +226,8 @@ class StateMonitor(object):
                             new_value = old_value
                             logger.debug(
                                 "Only minimal range difference received. No change registered to avoid wakelock.")
-                    if (old_value == '') or ((new_value is not None) and (new_value != old_value)):
+                    if (old_value == '') or ((new_value is not None) and (new_value != old_value)) or \
+                            ((request == 'charge_state' and result['charging_state'] == 'Charging') and (element in ['charger_power', 'charger_voltage', 'charger_actual_current'])):
                         logger.debug("Value Change, SG: " + request + ": Logging..." + element +
                                     ": old value: " + str(old_value) + ", new value: " + str(new_value))
                         if not header_printed:
@@ -455,7 +456,10 @@ while True:
         # We cannot be sleeping with small poll interval for sure.
         # In fact can we be sleeping at all if scraping is enabled?
         if poll_interval >= 64 or resume:
-            state_monitor.refresh_vehicle()
+            try:
+                state_monitor.refresh_vehicle()
+            except:
+                logger.info("Hostname Exception Caught")
         # Car woke up
         if is_asleep == 'asleep' and state_monitor.vehicle['state'] == 'online':
             poll_interval = 0

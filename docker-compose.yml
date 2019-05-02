@@ -16,6 +16,8 @@ services:
     container_name: "grafana_apiscraper"
     environment:
       - GF_INSTALL_PLUGINS=natel-discrete-panel,https://mephis.to/grafana-trackmap-panel/dist.zip;grafana-trackmap-panel
+        #      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s/grafana/  <<< Set this if you want to hide Grafana begind a subpath, eg: https://yourhomeseerver.url/grafana/
+
     ports:
       - "3000:3000"
     links:
@@ -28,6 +30,8 @@ services:
   apiscraper:
     container_name: apiscraper
     build:
+      args:
+        gitversion: master
       context: .
       dockerfile: Dockerfile.compose
     volumes:
