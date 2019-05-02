@@ -3,7 +3,7 @@ Selfhosted API Scraper for pulling Vehicle Telemetry from the Tesla Owner API in
 
 Known to work with Model S, X and 3.
 
-_Current Release: v2019.4.1_
+_Current Release: v2019.5_
 
 **Putting an end to __handing out the Key__ for your 100+ Grand Car to a third party you don't know.**
 
@@ -115,7 +115,7 @@ rm -rf srtm.py
 eg:
 ```
 cd tesla-apiscraper
-git checkout v2019.4.1
+git checkout v2019.5
 ```
 
 - Configure API Scraper
@@ -209,9 +209,10 @@ to stop the Stack:
 docker-compose down
 ```
 
-to rebuild the whole Stack:
+to update and rebuild the whole Stack:
 
 ```
+docker-compose pull
 docker-compose build --build-arg CACHEBUST=$(date +%s) apiscraper
 docker-compose up --force-recreate --build
 ```

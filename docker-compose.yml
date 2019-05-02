@@ -31,7 +31,7 @@ services:
     container_name: apiscraper
     build:
       args:
-        gitversion: master
+        gitversion: 69e2af3cec804688c01c7c1b85a130997ca6107b
       context: .
       dockerfile: Dockerfile.compose
     volumes:

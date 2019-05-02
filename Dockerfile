@@ -49,7 +49,7 @@ WORKDIR /
 
 # Configure it
 WORKDIR tesla-apiscraper
-RUN git checkout v2019.4.1
+RUN git checkout v2019.5
 RUN cp config.py.dist config.py
 
 # Create temp files for dashboard API calls
