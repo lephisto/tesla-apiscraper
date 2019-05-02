@@ -9,9 +9,7 @@ _Current Release: v2019.5_
 
 This can be hosted on any System that's capable of running InfluxDB, Grafana and Python. In this short guide I assume you're using a Debian'ish OS. It can run on a dedicated Linuxserver out there on the Internets or on your home Raspberry Pi.
 
-## Android
-
-The App is available on [here on Google Play](https://play.google.com/store/apps/details?id=to.mephis.apiscrapercontrol)
+It also has it's own API for use with an Android app or your own custom implementation, this will make sure you can start/stop/resume scraping your car. The App for Android is available on [here on Google Play](https://play.google.com/store/apps/details?id=to.mephis.apiscrapercontrol)
 
 The current App Version is 1.2.8
 
@@ -19,6 +17,8 @@ The current App Version is 1.2.8
 
 - Capable of handling multiple Vehicles in one Tesla Account
 - Extended Sleep support: Car will fall asleep after certain time of no charging and no driving. Monitoring will continue withing 60 Seconds on car usage.
+- Control, comes with built-in API for use with an Android app or custom implementation to stop/resume scraping
+
 
 ## Screenshots
 
@@ -210,6 +210,7 @@ docker-compose down
 ```
 
 to update and rebuild the whole Stack:
+to rebuild the whole Stack:
 
 ```
 docker-compose pull
@@ -260,6 +261,19 @@ a_apiport = 8023
 
 I strongly recommend to put all this behind a reverse Proxy, probably with HTTP Basic authentication in addition to the API Key.
 
+## Using the API for the Scraper App for Android or custom implementation
+
+When calling from a custom implementation ensure you set the headers correctly and format your data as JSON. Examples in `curl` are included below
+
+```
+# Getting status:
+curl --header "Content-type: application/json" --header "apikey: somerandomnumberwithenoughdigitsthatcantbeguessedeasily" http://127.0.0.1:8023/state
+# Start/resume scrape:
+curl -X POST --header "Content-type: application/json" --header "apikey: somerandomnumberwithenoughdigitsthatcantbeguessedeasily" http://127.0.0.1:8023/switch --data '{"command":"scrape","value":""}'
+# Stop scrape:
+curl -X POST --header "Content-type: application/json" --header "apikey: somerandomnumberwithenoughdigitsthatcantbeguessedeasily" http://127.0.0.1:8023/switch --data '{"command":"scrape","value":"False"}'
+# Single call
+curl -X POST --header "Content-type: application/json" --header "apikey: somerandomnumberwithenoughdigitsthatcantbeguessedeasily" http://127.0.0.1:8023/switch --data '{"command":"oneshot","value":""}'
 An exmple Apache Reverseproxy configuration would look like:
 
 ```        
