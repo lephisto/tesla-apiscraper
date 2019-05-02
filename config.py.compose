@@ -27,7 +27,7 @@ a_logfile = 'apiscraper.log'                # APIScraper Logfile
 a_loglevel = 20                             # Loglevel 10: DE
 
 # Influx DB Credentials
-a_influx_host = 'localhost'                 # Set this to influxdb_apiscraper in a Docker environment, otherwise: localhost
+a_influx_host = 'influxdb_apiscraper'       # Set this to influxdb_apiscraper in a Docker environment, otherwise: localhost
 a_influx_port = 8086                        # InfluxDB Port
 a_influx_user = 'tesla'                     # InfluxDB Username
 a_influx_pass = '<influxdbpassword>'        # InfluxDB Password

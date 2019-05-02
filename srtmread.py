@@ -1,15 +1,17 @@
 import os
 import sys
-import srtm
 from pathlib import Path
 
-def elevationtoinflux(lat, lon, vin, displayname, ts, ifclient, dryrun):
+import srtm
+
+
+def elevationtoinflux(lat, lon, vin, displayname, ts, ifclient, dryrun, logger):
     if not os.path.isfile('srtm.lck.' + str(os.getpid())):
         Path('srtm.lck.' + str(os.getpid())).touch()
         elevation_data = srtm.get_data()
         elevation = elevation_data.get_elevation(lat, lon)
         os.remove('srtm.lck.' + str(os.getpid()))
-        print("Elevation: " + str(elevation))
+        logger.debug("Elevation: " + str(elevation))
         elev_json_body = [
             {
                 "measurement": "drive_state",
@@ -17,7 +19,7 @@ def elevationtoinflux(lat, lon, vin, displayname, ts, ifclient, dryrun):
                     "vin": vin,
                     "display_name": displayname,
                 },
-                "time": ts * 1000000,
+                "time": int(ts * 1000000),
                 "fields": {
                     "elevation": elevation
                 }

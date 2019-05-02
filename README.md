@@ -1,13 +1,17 @@
 # tesla-apiscraper
 Selfhosted API Scraper for pulling Vehicle Telemetry from the Tesla Owner API into an InfluxDB visualisation on Grafana Dashboards.
 
-_Current Release: v2019.2_
+Known to work with Model S, X and 3.
+
+_Current Release: v2019.4.1_
 
 **Putting an end to __handing out the Key__ for your 100+ Grand Car to a third party you don't know.**
 
 This can be hosted on any System that's capable of running InfluxDB, Grafana and Python. In this short guide I assume you're using a Debian'ish OS. It can run on a dedicated Linuxserver out there on the Internets or on your home Raspberry Pi.
 
 It also has it's own API for use with an Android app or your own custom implementation, this will make sure you can start/stop/resume scraping your car. The App for Android is available on [here on Google Play](https://play.google.com/store/apps/details?id=to.mephis.apiscrapercontrol)
+
+The current App Version is 1.2.8
 
 ## Features
 
@@ -18,17 +22,24 @@ It also has it's own API for use with an Android app or your own custom implemen
 
 ## Screenshots
 
-![Driving Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/driving_dash.png)
+![Driving Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/teslametrics_v2_1.png)
 
-![Charging Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/charging_dash.png)
+![Charging Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/teslametrics_v2_2.png)
+
+Projected 100% Range:
+
+![Projected Graph](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/teslametrics_v2_3.png)
 
 ## Installation:
 
-- Install Python
+We updated to Python3 since Python2 is being phased out soon. Python2 is unsupported as of now.
+
+- Install Python3
+
 
 eg:
 ```
-sudo apt install python python-pathlib
+sudo apt install python3 python3-pathlib python3-pip python3-influxdb
 ```
 
 - Install InfluxDB as in https://docs.influxdata.com/influxdb/v1.7/introduction/installation/ and create a Database where you want to store your Data in:
@@ -45,13 +56,16 @@ Additionally I suggest you to setup authentication or close the InfluxDB Port wi
 
 - Install Grafana as in http://docs.grafana.org/installation/debian/
 
-- Get Grafana grafana-trackmap-panel
+- Get Grafana grafana-trackmap-panel (and required node package manager)
 
 ```
+apt install npm
 cd /var/lib/grafana/plugins
-git clone https://github.com/pR0Ps/grafana-trackmap-panel
+git clone https://github.com/lephisto/grafana-trackmap-panel
 cd grafana-trackmap-panel
-git checkout releases
+git checkout v2.0.4-teslascraper
+npm install
+npm run build
 ```
 
 - Get Grafana natel-discrete-panel
@@ -81,25 +95,12 @@ There you can change $rangeunit "km" to "mi" and $rangefactor 1.60934 to 1.0 and
 git clone https://github.com/lephisto/tesla-apiscraper
 ```
 
-- Always pick a release
-
-eg:
-```
-git checkout v2019.2
-```
-
-- Get Python InfluxDB Module
-
-```
-pip install influxdb
-```
-
 - Install requirements for Elevation Calculation
 
 ```
 git clone https://github.com/tkrajina/srtm.py
 cd srtm.py
-python ./setup.py install --user
+python3 ./setup.py install --user
 cd ..
 ```
 
@@ -108,11 +109,21 @@ Important:
 rm -rf srtm.py  
 ```
 
+
+- Always pick a release
+
+eg:
+```
+cd tesla-apiscraper
+git checkout v2019.4.1
+```
+
 - Configure API Scraper
 
 ```
+cd tesla-apiscraper
 cp config.py.dist config.py
-vim config.py
+nano config.py
 ```
 
 Set Tesla and Influxdb Credentials there.
@@ -121,31 +132,121 @@ Set Tesla and Influxdb Credentials there.
 Afterwards start the Scraping:
 
 ```
-python apiscraper.py
+python3 ./apiscraper.py
 ```
 
 Once you know everything is running fine you can start the scraper to keep running with screen or tmux, or feel free to write down a systemd service definition file.
 
 ```
-tmux new-session -s apiscraper 'python apiscraper.py'
+tmux new-session -s apiscraper 'python3 apiscraper.py'
 ```
 
 ## Building with Docker
 
-Alternatively, you can build and run tesla-apiscraper via Docker.
+Alternatively, you can build and run tesla-apiscraper via Docker. There are two methods to run Docker stuff: Standalone and docker-compose. I recommend docker-compose in terms of the ability to update components properly.
 
-To build, run:
+### Standalone (deprecated):
 
 ```
+mkdir -p /opt/apiscraper/influxdb
 docker build ./ -t tesla-apiscraper
 ```
 
-To run it, use:
+Run:
 
 ```
-docker run -p 3000:3000 -e "TESLA_USERNAME=<your tesla email>" -e "TESLA_PASSWORD=<your tesla password>" tesla-apiscraper:latest
+docker run -p 3000:3000 -p 8023:8023 -v /opt/apiscraper/influxdb:/var/lib/influxdb -e "TESLA_USERNAME=<your tesla email>" -e "TESLA_PASSWORD=<your tesla password>" tesla-apiscraper:latest
 ```
-## Using the API for the Scraper App for Android or custom implementation
+
+In this case the timeseries data will persist in /opt/apiscraper/influxdb on your Dockerhost. Feel free to adjust to your needs.
+
+### Docker-Compose
+
+Copy config
+
+```
+cp config.py.compose config.py
+```
+
+Edit your settings, at least put in your MyTesla credentials
+
+```
+nano config.py
+```
+
+The configuration is mapped outside the container, so you can conventiently change the Configuration the same way you would without running docker, restart the container and you're good to go. Same goes for the Logfile.
+
+Important: Create empty Log, otherwise bindmount will fail.
+
+```
+touch apiscraper.log
+```
+
+Create Directories for persistent Data:
+
+```
+sudo mkdir -p /opt/apiscraper/influxdb
+sudo mkdir -p /opt/apiscraper/grafana
+sudo chown 472 /opt/apiscraper/grafana
+```
+
+Start Docker Stack
+
+```
+./dashboard2docker.sh
+docker-compose up
+```
+
+to keep the Console detached:
+
+```
+docker-compose up -d
+```
+
+to stop the Stack:
+
+```
+docker-compose down
+```
+to rebuild the whole Stack:
+
+```
+docker-compose build --build-arg CACHEBUST=$(date +%s) apiscraper
+docker-compose up --force-recreate --build
+```
+
+You can now reach your Grafana Instance at http://localhost:3000
+
+#### A note on Docker on the Raspberry Pi:
+
+Raspian comes with a fairly outdated Version of Docker. Get a current one with:
+
+```
+curl -fsSL get.docker.com -o get-docker.sh && sh get-docker.sh
+apt-get install docker-compose
+```
+
+Since you maybe want to handle Docker as non-root User, type:
+```
+usermod -aG docker pi
+reboot
+```
+... adds pi or any other user you would like to the Docker Group.
+
+Make it start on boot:
+
+```
+cp tesla-apiscraper.service /lib/systemd/system
+sudo systemctl daemon-reload
+sudo systemctl enable tesla-apiscraper.service
+```
+
+
+~~Note for Pi Zero Users: Since there's a glitch in 18.10.* on the ArmV6 you want to downgrade to docker-ce=18.06.1~ce~3-0~raspbian~~
+
+This probably won't work on a Pi zero W, since ArmV6 is too weak.
+
+## Using the API for the Scraper App for android
 
 There's a little Android App, that can help you letting your car sleep and immidiately turn on scraping when needed. You need to uncomment and configure the follwing Values for it in config.py:
 
@@ -156,6 +257,8 @@ a_apiport = 8023
 ```
 
 I strongly recommend to put all this behind a reverse Proxy, probably with HTTP Basic authentication in addition to the API Key.
+
+## Using the API for the Scraper App for Android or custom implementation
 
 When calling from a custom implementation ensure you set the headers correctly and format your data as JSON. Examples in `curl` are included below
 
@@ -168,6 +271,15 @@ curl -X POST --header "Content-type: application/json" --header "apikey: someran
 curl -X POST --header "Content-type: application/json" --header "apikey: somerandomnumberwithenoughdigitsthatcantbeguessedeasily" http://127.0.0.1:8023/switch --data '{"command":"scrape","value":"False"}'
 # Single call
 curl -X POST --header "Content-type: application/json" --header "apikey: somerandomnumberwithenoughdigitsthatcantbeguessedeasily" http://127.0.0.1:8023/switch --data '{"command":"oneshot","value":""}'
+An exmple Apache Reverseproxy configuration would look like:
+
+```        
+#Apiscraper
+ProxyPass /scraperapi http://localhost:8023
+ProxyPassReverse /scraperapi http://localhost:8023
+#Grafana
+ProxyPass /grafana http://localhost:3000
+ProxyPassReverse /grafana http://localhost:3000
 ```
 
 ## Known Limitations and issues

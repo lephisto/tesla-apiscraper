@@ -1,0 +1,44 @@
+version: '2'
+
+
+services:
+
+  influxdb:
+    image: "influxdb:latest"
+    container_name: "influxdb_apiscraper"
+    environment:
+      - INFLUXDB_DB="tesla"
+    volumes:
+      - /opt/apiscraper/influxdb:/var/lib/influxdb
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: "grafana_apiscraper"
+    environment:
+      - GF_INSTALL_PLUGINS=natel-discrete-panel,https://mephis.to/grafana-trackmap-panel/dist.zip;grafana-trackmap-panel
+        #      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s/grafana/  <<< Set this if you want to hide Grafana begind a subpath, eg: https://yourhomeseerver.url/grafana/
+
+    ports:
+      - "3000:3000"
+    links:
+      - influxdb
+    user: "472"
+    volumes:
+      - /opt/apiscraper/grafana:/var/lib/grafana
+      - ./provisioning/:/etc/grafana/provisioning
+
+  apiscraper:
+    container_name: apiscraper
+    build:
+      args:
+        gitversion: master
+      context: .
+      dockerfile: Dockerfile.compose
+    volumes:
+       - ./config.py:/tesla-apiscraper/config.py
+       - ./apiscraper.log:/tesla-apiscraper/apiscraper.log
+    ports:
+      - "8023:8023"
+    restart: on-failure:5
+    depends_on:
+      - influxdb

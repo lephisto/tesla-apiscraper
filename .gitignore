@@ -8,3 +8,5 @@ apiscraper.log
 hgt/*.zip
 hgt/*.hgt
 hgt/*.downloading
+*.iml
+provisioning/dashboards/*.json

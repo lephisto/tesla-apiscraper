@@ -1,0 +1,25 @@
+[Unit]
+Description=Tesla API Scraper
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+Users=pi
+WorkingDirectory=/home/pi/tesla-apiscraper
+
+# Remove old containers, images and volumes
+ExecStartPre=/usr/bin/docker-compose -f docker-compose.yml down -v
+ExecStartPre=/usr/bin/docker-compose -f docker-compose.yml rm -v
+ExecStartPre=-/bin/bash -c 'docker volume rm $(docker volume ls -q)'
+ExecStartPre=-/bin/bash -c 'docker rmi $(docker images | grep "<none>" | awk \'{print $3}\')'
+ExecStartPre=-/bin/bash -c 'docker rm -v $(docker ps -aq)'
+
+# Compose up
+ExecStart=/usr/bin/docker-compose -f docker-compose.yml up --no-color
+
+# Compose down, remove containers and volumes
+ExecStop=/usr/bin/docker-compose -f docker-compose.yml down -v --no-color
+
+[Install]
+WantedBy=multi-user.target
