@@ -206,6 +206,13 @@ class StateMonitor(object):
                         "timestamp", "gps_as_of", "left_temp_direction", "right_temp_direction", "charge_port_latch"):
                     old_value = self.old_values[request].get(element, '')
                     new_value = result[element]
+                    if new_value is not None:
+                        if element not in a_ignore:
+                            if element in a_validity_checks and eval(a_validity_checks[element]["eval"]):
+                                logger.debug(
+                                    "VALIDITY CHECK VIOLATED >>> " + element + ":" + a_validity_checks[element][
+                                        "eval"])
+                                new_value = a_validity_checks[element]["set"]
                     if element == "vehicle_name" and not new_value:
                         continue
                     if element == "native_latitude":
