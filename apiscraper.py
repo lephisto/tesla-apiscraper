@@ -106,11 +106,11 @@ class StateMonitor(object):
 
     def ongoing_activity_status(self):
         """ True if the car is not in park, or is actively charging ... """
-        if self.vehicle_is_driving():
+        if self.is_vehicle_driving():
             logger.debug("Vehicle is Driving")
             return "Driving"
 
-        if self.vehicle_is_charging():
+        if self.is_vehicle_charging():
             logger.debug("Vehicle is Charging")
             return "Charging"
 
@@ -124,7 +124,7 @@ class StateMonitor(object):
 
         return None
 
-    def vehicle_is_driving(self):
+    def is_vehicle_driving(self):
 
         shift = self.old_values['drive_state'].get('shift_state', '') or ''
         old_speed = self.old_values['drive_state'].get('speed', 0) or 0
@@ -135,7 +135,7 @@ class StateMonitor(object):
 
         return False
 
-    def vehicle_is_charging(self):
+    def is_vehicle_charging(self):
 
         if self.old_values['charge_state'].get('charging_state', '') in ["Charging", "Starting"]:
             return True
@@ -297,8 +297,7 @@ class StateMonitor(object):
             if self.request_state_group():
                 any_change = True
             else:
-                shift = self.old_values['drive_state'].get('shift_state', '')
-                if shift == "R" or shift == "D":
+                if self.is_vehicle_driving():
                     # We are actively driving, does not matter we are
                     # stopped at a traffic light or whatnot,
                     # keep polling
