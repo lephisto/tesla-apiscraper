@@ -10,4 +10,5 @@ hgt/*.hgt
 hgt/*.downloading
 *.iml
 provisioning/dashboards/*.json
+provisioning/dashboards/*.bak
 data/*
