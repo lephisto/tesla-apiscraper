@@ -32,9 +32,9 @@ If you ever want to update the stack:
 
 ```bash
 git pull
-docker-compose pull
+docker-compose rm apiscraper
 docker-compose build apiscraper
-docker-compose up --force-recreate --build
+docker-compose up
 ```
 
 ## Migrate from lephisto/tesla-apiscraper to lunars/tesla-apiscraper
