@@ -8,6 +8,12 @@ if [[ $teslaEmail == "" || $teslaPassword == "" ]]; then
     exit
 fi
 
+device=$(cat /proc/device-tree/model)
+if [[ $device == *"Raspberry Pi Zero"* ]]; then 
+    echo "This will not work on a Pi Zero, quitting install"
+    exit
+fi
+
 git clone https://github.com/Lunars/tesla-apiscraper.git
 cd tesla-apiscraper
 
