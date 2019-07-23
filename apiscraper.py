@@ -227,6 +227,7 @@ class StateMonitor(object):
                         "timestamp", "gps_as_of", "left_temp_direction", "right_temp_direction", "charge_port_latch"):
                     old_value = self.old_values[request].get(element, '')
                     new_value = result[element]
+
                     if new_value is not None:
                         if element not in a_ignore:
                             if element in a_validity_checks and eval(a_validity_checks[element]["eval"]):
@@ -306,6 +307,7 @@ class StateMonitor(object):
 
         except (HTTPError, URLError) as exc:
             logger.info("HTTP Error: " + str(exc))
+
             if a_allow_sleep == 1:
                 return interval
             else:
@@ -492,7 +494,7 @@ while True:
             poll_interval = 0
             asleep_since = 0
 
-        if state_monitor.vehicle['state'] == 'asleep' and is_asleep == 'online':
+        if state_monitor.vehicle['state'] == 'asleep' and (is_asleep == 'online' or asleep_since == 0):
             asleep_since = time.time()
 
         is_asleep = state_monitor.vehicle['state']
@@ -516,8 +518,8 @@ while True:
             influx_client.write_points(state_body)
         logger.debug("Car State: " + is_asleep +
                     " Poll Interval: " + str(poll_interval))
-        if is_asleep == 'asleep' and a_allow_sleep == 1:
-            logger.debug("Car is probably asleep, we let it sleep...")
+        if is_asleep == 'offline' or (is_asleep == 'asleep' and a_allow_sleep == 1):
+            logger.debug("Car is asleep or offline...")
             poll_interval = 64
 
         if poll_interval >= 0:
