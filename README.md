@@ -31,8 +31,9 @@ Both logfile (apiscraper.log) and the config file (config.py) are mapped outside
 If you ever want to update the stack:
 
 ```bash
+git pull
 docker-compose pull
-docker-compose build --build-arg CACHEBUST=$(date +%s) apiscraper
+docker-compose build --no-cache apiscraper
 docker-compose up --force-recreate --build
 ```
 
