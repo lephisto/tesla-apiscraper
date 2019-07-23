@@ -8,10 +8,6 @@ Known to work with Model S, X and 3. Capable of handling multiple Vehicles in on
 
 ## Install
 
-*Note: This probably won't work on a Pi zero W, since ArmV6 is too weak.*
-
-1. Edit your settings in `config.py`, at least put in your MyTesla credentials. Do not edit the influx credentials! The docker script will automatically fill that out for you later.
-
 ```bash
 # Enter your email and password to your tesla.com account
 teslaEmail=""
@@ -19,6 +15,10 @@ teslaPassword=""
 
 curl -sL "https://git.io/fjD3b?$(date +%s)" > install && bash install $teslaEmail $teslaPassword
 ```
+
+*Note: This probably won't work on a Pi zero W, since ArmV6 is too weak.*
+
+#### After install
 
 Your system will reboot, and then you can reach your Grafana Instance at http://localhost:3000
 
