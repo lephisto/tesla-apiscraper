@@ -39,6 +39,13 @@ Build and run tesla-apiscraper via Docker.
 1. Edit your settings in `config.py`, at least put in your MyTesla credentials. Do not edit the influx credentials! The docker script will automatically fill this out for you later.
 
 ```bash
+git clone https://github.com/Lunars/tesla-apiscraper.git
+cd tesla-apiscraper
+
+# Create the config file
+cp config.py.compose config.py
+
+# Edit the file to insert your Tesla account credentials
 nano config.py
 ```
 
@@ -47,9 +54,6 @@ nano config.py
 ```bash
 # Important: Create empty Log, otherwise bindmount will fail.
 touch apiscraper.log
-
-# Create the config file
-cp config.py.compose config.py
 
 # Create Directories for persistent Data:
 sudo mkdir -p /opt/apiscraper/influxdb
