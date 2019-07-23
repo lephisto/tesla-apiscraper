@@ -27,7 +27,7 @@ ARG gitversion
 RUN git clone https://github.com/Lunars/tesla-apiscraper
 WORKDIR tesla-apiscraper
 RUN git pull
-RUN git checkout $gitversion
+RUN git checkout master
 # Define our startup script
 RUN echo "#!/bin/bash" > /start.sh
 RUN echo "python3 /tesla-apiscraper/apiscraper.py" >> /start.sh
