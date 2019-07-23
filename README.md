@@ -34,6 +34,17 @@ docker-compose build --build-arg CACHEBUST=$(date +%s) apiscraper
 docker-compose up --force-recreate --build
 ```
 
+## Migrate from lephisto/tesla-apiscraper to lunars/tesla-apiscraper
+
+If you're coming from the original repo, you can just update your instance to Lunars
+
+```bash
+git remote rename origin upstream
+git remote add origin https://github.com/Lunars/tesla-apiscraper.git
+git branch --set-upstream-to origin/master master
+git pull
+```
+
 ## Screenshots
 
 ![Driving Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/teslametrics_v2_1.png)
