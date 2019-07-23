@@ -17,7 +17,7 @@ Paste the following in your terminal
 teslaEmail=""
 teslaPassword=""
 
-curl -sL "https://git.io/fjD3b?$(date +%s)" > install && bash install $teslaEmail $teslaPassword
+bash install.sh $teslaEmail $teslaPassword
 ```
 
 *Note: This probably won't work on a Pi zero W, since ARMv6 is too weak*
@@ -34,7 +34,7 @@ If you ever want to update the stack:
 
 ```bash
 git pull
-docker-compose rm apiscraper
+docker-compose rm --force --stop apiscraper
 docker-compose build apiscraper
 docker-compose up -d
 ```
