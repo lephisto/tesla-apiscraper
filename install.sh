@@ -31,13 +31,17 @@ sed -i "s/Users=pi/Users=$(id -u -n)/g" ./tesla-apiscraper.service
 touch apiscraper.log
 
 # Create Directories for persistent Data:
-sudo mkdir -p /opt/apiscraper/influxdb
-sudo mkdir -p /opt/apiscraper/grafana
-sudo chown 472 /opt/apiscraper/grafana
+mkdir -p data/influxdb
+mkdir -p data/grafana
+sudo chown 472 data/grafana
 
-# Update docker
-curl -fsSL get.docker.com -o get-docker.sh && sh get-docker.sh
-apt-get install docker-compose
+# Install docker/docker-compose if not exists
+if ! hash docker 2>/dev/null; then
+  curl -fsSL get.docker.com -o get-docker.sh && sh get-docker.sh
+fi
+if ! hash docker-compose 2>/dev/null; then
+  apt-get install docker-compose
+fi
 
 # Start Docker Stack
 ./dashboard2docker.sh

@@ -10,3 +10,4 @@ hgt/*.hgt
 hgt/*.downloading
 *.iml
 provisioning/dashboards/*.json
+data/*
