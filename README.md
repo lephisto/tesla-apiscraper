@@ -36,7 +36,7 @@ If you ever want to update the stack:
 git pull
 docker-compose rm apiscraper
 docker-compose build apiscraper
-docker-compose up
+docker-compose up -d
 ```
 
 ## Migrate from lephisto/tesla-apiscraper to lunars/tesla-apiscraper
