@@ -1,17 +1,12 @@
-# tesla-apiscraper
+# Tesla API Scraper
+
 Selfhosted API Scraper for pulling Vehicle Telemetry from the Tesla Owner API into an InfluxDB visualisation on Grafana Dashboards.
 
 Known to work with Model S, X and 3.
 
-_Current Release: v2019.5_
-
-**Putting an end to __handing out the Key__ for your 100+ Grand Car to a third party you don't know.**
+*Putting an end to __handing out the Key__ for your >$100k car to a third party you don't know.*
 
 This can be hosted on any System that's capable of running InfluxDB, Grafana and Python. In this short guide I assume you're using a Debian'ish OS. It can run on a dedicated Linuxserver out there on the Internets or on your home Raspberry Pi.
-
-It also has it's own API for use with an Android app or your own custom implementation, this will make sure you can start/stop/resume scraping your car. The App for Android is available on [here on Google Play](https://play.google.com/store/apps/details?id=to.mephis.apiscrapercontrol)
-
-The current App Version is 1.2.8
 
 ## Features
 
@@ -19,18 +14,7 @@ The current App Version is 1.2.8
 - Extended Sleep support: Car will fall asleep after certain time of no charging and no driving. Monitoring will continue withing 60 Seconds on car usage.
 - Control, comes with built-in API for use with an Android app or custom implementation to stop/resume scraping
 
-
-## Screenshots
-
-![Driving Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/teslametrics_v2_1.png)
-
-![Charging Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/teslametrics_v2_2.png)
-
-Projected 100% Range:
-
-![Projected Graph](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/teslametrics_v2_3.png)
-
-## Installation:
+## Install
 
 *Note: This probably won't work on a Pi zero W, since ArmV6 is too weak.*
 
@@ -90,6 +74,14 @@ docker-compose pull
 docker-compose build --build-arg CACHEBUST=$(date +%s) apiscraper
 docker-compose up --force-recreate --build
 ```
+
+## Screenshots
+
+![Driving Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/teslametrics_v2_1.png)
+
+![Charging Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/teslametrics_v2_2.png)
+
+![Projected Graph](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/teslametrics_v2_3.png)
 
 ## Known Limitations and issues
 
