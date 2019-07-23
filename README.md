@@ -10,6 +10,8 @@ Known to work with Model S, X and 3. Capable of handling multiple Vehicles in on
 
 ## Install
 
+Paste the following in your terminal
+
 ```bash
 # Enter your email and password to your tesla.com account
 teslaEmail=""
@@ -34,7 +36,7 @@ If you ever want to update the stack:
 git pull
 docker-compose rm --force --stop apiscraper
 docker-compose build apiscraper
-docker-compose up
+docker-compose up -d
 ```
 
 ## Migrate from lephisto/tesla-apiscraper to lunars/tesla-apiscraper

@@ -28,9 +28,9 @@ RUN apt-get install -y nodejs
 # Install Grafana addons
 RUN apt-get -y install git
 WORKDIR /var/lib/grafana/plugins
-RUN git clone https://github.com/lephisto/grafana-trackmap-panel
+RUN git clone https://github.com/Lunars/grafana-trackmap-panel
 WORKDIR /var/lib/grafana/plugins/grafana-trackmap-panel
-RUN git checkout v2.0.4-teslascraper
+RUN git checkout master
 RUN npm install
 RUN npm audit fix
 RUN npm run build
@@ -39,7 +39,7 @@ RUN grafana-cli plugins install natel-discrete-panel
 # Install Tesla API Scraper
 RUN apt-get -y install python3-pip
 WORKDIR /
-RUN git clone https://github.com/lephisto/tesla-apiscraper
+RUN git clone https://github.com/Lunars/tesla-apiscraper
 RUN pip3 install influxdb
 
 RUN git clone https://github.com/tkrajina/srtm.py
@@ -49,7 +49,7 @@ WORKDIR /
 
 # Configure it
 WORKDIR tesla-apiscraper
-RUN git checkout v2019.5
+RUN git checkout master
 RUN cp config.py.dist config.py
 
 # Create temp files for dashboard API calls
