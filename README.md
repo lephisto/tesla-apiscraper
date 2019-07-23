@@ -33,7 +33,7 @@ If you ever want to update the stack:
 ```bash
 git pull
 docker-compose pull
-docker-compose build --no-cache apiscraper
+docker-compose build apiscraper
 docker-compose up --force-recreate --build
 ```
 
