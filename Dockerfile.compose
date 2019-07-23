@@ -24,7 +24,7 @@ WORKDIR /
 ARG CACHEBUST=1
 ARG gitversion
 # Configure it
-RUN git clone https://github.com/lephisto/tesla-apiscraper
+RUN git clone https://github.com/Lunars/tesla-apiscraper
 WORKDIR tesla-apiscraper
 RUN git pull
 RUN git checkout $gitversion
