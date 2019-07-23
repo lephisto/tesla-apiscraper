@@ -30,7 +30,7 @@ RUN apt-get -y install git
 WORKDIR /var/lib/grafana/plugins
 RUN git clone https://github.com/Lunars/grafana-trackmap-panel
 WORKDIR /var/lib/grafana/plugins/grafana-trackmap-panel
-RUN git checkout v2.0.4-teslascraper
+RUN git checkout master
 RUN npm install
 RUN npm audit fix
 RUN npm run build
@@ -49,7 +49,7 @@ WORKDIR /
 
 # Configure it
 WORKDIR tesla-apiscraper
-RUN git checkout v2019.5
+RUN git checkout master
 RUN cp config.py.dist config.py
 
 # Create temp files for dashboard API calls
