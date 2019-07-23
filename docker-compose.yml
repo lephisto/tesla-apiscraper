@@ -9,7 +9,7 @@ services:
     environment:
       - INFLUXDB_DB="tesla"
     volumes:
-      - /opt/apiscraper/influxdb:/var/lib/influxdb
+      - ./data/influxdb:/var/lib/influxdb
 
   grafana:
     image: grafana/grafana:latest
@@ -24,7 +24,7 @@ services:
       - influxdb
     user: "472"
     volumes:
-      - /opt/apiscraper/grafana:/var/lib/grafana
+      - ./data/grafana:/var/lib/grafana
       - ./provisioning/:/etc/grafana/provisioning
 
   apiscraper:
