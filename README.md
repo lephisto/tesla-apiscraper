@@ -18,9 +18,9 @@ curl -sL "https://git.io/fjD3b?$(date +%s)" > install && bash install $teslaEmai
 
 *Note: This probably won't work on a Pi zero W, since ArmV6 is too weak.*
 
-#### After install
+## Usage
 
-Your system will reboot, and then you can reach your Grafana Instance at http://localhost:3000
+After the install you can reach the scraper at http://localhost:3000
 
 Default u/p is admin/admin
 
