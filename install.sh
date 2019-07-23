@@ -22,6 +22,11 @@ cp config.py.compose config.py
 sed -i "s/<email>/${teslaEmail}/g" ./config.py
 sed -i "s/<password>/${teslaPassword}/g" ./config.py
 
+currentDirectory=$(echo $PWD | sed 's_/_\\/_g')
+originalDirectory=$(echo /home/pi/tesla-apiscraper | sed 's_/_\\/_g')
+sed -i "s/${originalDirectory}/${currentDirectory}/g" ./tesla-apiscraper.service
+sed -i "s/Users=pi/Users=$(id -u -n)/g" ./tesla-apiscraper.service
+
 # Important: Create empty Log, otherwise bindmount will fail.
 touch apiscraper.log
 
@@ -44,5 +49,5 @@ sudo systemctl daemon-reload
 sudo systemctl enable tesla-apiscraper.service
 
 # Add pi or any other user you would like to the Docker Group
-usermod -aG docker pi
+usermod -aG docker $(id -u -n)
 reboot
