@@ -1,9 +1,9 @@
 # Exclude
-config.py
+config*.py
 teslajson-master/
 master.zip
 *.pyc
-apiscraper.log
+*.log
 .idea
 hgt/*.zip
 hgt/*.hgt
