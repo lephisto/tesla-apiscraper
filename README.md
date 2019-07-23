@@ -6,6 +6,8 @@ Selfhosted API Scraper for pulling Vehicle Telemetry from the Tesla Owner API in
 
 Known to work with Model S, X and 3. Capable of handling multiple Vehicles in one Tesla Account
 
+![Driving Dashboard](https://raw.githubusercontent.com/lunars/tesla-apiscraper/master/screenshots/teslametrics_v2_1.png)
+
 ## Install
 
 ```bash
@@ -16,7 +18,7 @@ teslaPassword=""
 curl -sL "https://git.io/fjD3b?$(date +%s)" > install && bash install $teslaEmail $teslaPassword
 ```
 
-*Note: This probably won't work on a Pi zero W, since ArmV6 is too weak.*
+*Note: This probably won't work on a Pi zero W, since ARMv6 is too weak*
 
 ## Usage
 
@@ -44,14 +46,6 @@ git remote add origin https://github.com/Lunars/tesla-apiscraper.git
 git branch --set-upstream-to origin/master master
 git pull
 ```
-
-## Screenshots
-
-![Driving Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/teslametrics_v2_1.png)
-
-![Charging Dashboard](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/teslametrics_v2_2.png)
-
-![Projected Graph](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/teslametrics_v2_3.png)
 
 ## Known Limitations and issues
 
