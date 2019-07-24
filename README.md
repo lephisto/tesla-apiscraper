@@ -20,8 +20,6 @@ teslaPassword=""
 bash install.sh $teslaEmail $teslaPassword
 ```
 
-*Note: This probably won't work on a Pi zero W, since ARMv6 is too weak*
-
 ## Usage
 
 After the install you can reach the scraper at http://localhost:3000
