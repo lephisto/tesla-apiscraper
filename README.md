@@ -17,7 +17,7 @@ Paste the following in your terminal
 teslaEmail=""
 teslaPassword=""
 
-bash install.sh $teslaEmail $teslaPassword
+git clone https://github.com/Lunars/tesla-apiscraper.git && cd tesla-apiscraper && bash install.sh $teslaEmail $teslaPassword
 ```
 
 ## Usage
