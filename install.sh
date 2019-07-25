@@ -14,9 +14,6 @@ if [[ $device == *"Raspberry Pi Zero"* ]]; then
     exit
 fi
 
-git clone https://github.com/Lunars/tesla-apiscraper.git
-cd tesla-apiscraper
-
 # Create the config file
 cp config.py.compose config.py
 sed -i "s/<email>/${teslaEmail}/g" ./config.py
