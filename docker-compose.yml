@@ -1,15 +1,38 @@
-version: '2'
+version: '2.4'
 
+##############################################################################################
+# TEMPLATES
+##############################################################################################
+
+# Extendable apiscraper config. Not an actual service.
+# See https://docs.docker.com/compose/compose-file/#extension-fields
+x-apiscraper:
+  &default-apiscraper
+  build:
+    context: .
+    dockerfile: Dockerfile.compose
+  restart: on-failure:5
+  links:
+    - influxdb
+  command: ["/tesla-apiscraper/scripts/wait-for-it.sh", "influxdb:8086", "--", "python3", "/tesla-apiscraper/apiscraper.py"]
 
 services:
 
+  ##############################################################################################
+  # DEPENDENCIES
+  ##############################################################################################
   influxdb:
     image: "influxdb:latest"
     container_name: "influxdb_apiscraper"
     environment:
       - INFLUXDB_DB="tesla"
     volumes:
-      - /opt/apiscraper/influxdb:/var/lib/influxdb
+      - ./data/influxdb:/var/lib/influxdb
+    healthcheck:
+      test: "curl -X HEAD -f http://localhost:8086/ping"
+      interval: 3s
+      timeout: 10s
+      retries: 5
 
   grafana:
     image: grafana/grafana:latest
@@ -19,26 +42,40 @@ services:
         #      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s/grafana/  <<< Set this if you want to hide Grafana begind a subpath, eg: https://yourhomeseerver.url/grafana/
 
     ports:
+      # HOST:CONTAINER
       - "3000:3000"
     links:
       - influxdb
     user: "472"
     volumes:
-      - /opt/apiscraper/grafana:/var/lib/grafana
+      - ./data/grafana:/var/lib/grafana
       - ./provisioning/:/etc/grafana/provisioning
 
+  ##############################################################################################
+  # APPLICATION
+  ##############################################################################################
+
   apiscraper:
-    container_name: apiscraper
-    build:
-      args:
-        gitversion: 69e2af3cec804688c01c7c1b85a130997ca6107b
-      context: .
-      dockerfile: Dockerfile.compose
-    volumes:
-       - ./config.py:/tesla-apiscraper/config.py
-       - ./apiscraper.log:/tesla-apiscraper/apiscraper.log
+    << : *default-apiscraper
     ports:
       - "8023:8023"
-    restart: on-failure:5
-    depends_on:
-      - influxdb
+    volumes:
+      - ./config.py:/tesla-apiscraper/config.py
+      - ./apiscraper.log:/tesla-apiscraper/apiscraper.log
+
+  # Uncomment for more cars. Write config-{n}.py and apiscraper-{n}.log files.
+  # apiscraper-1:
+  #   << : *default-apiscraper
+  #   volumes:
+  #     - ./config-1.py:/tesla-apiscraper/config.py
+  #     - ./apiscraper-1.log:/tesla-apiscraper/apiscraper.log
+  #   ports:
+  #     - "8024:8023"
+
+  # apiscraper-2:
+  #   << : *default-apiscraper
+  #   volumes:
+  #     - ./config-2.py:/tesla-apiscraper/config.py
+  #     - ./apiscraper-2.log:/tesla-apiscraper/apiscraper.log
+  #   ports:
+  #     - "8025:8023"

@@ -106,29 +106,16 @@ class StateMonitor(object):
 
     def ongoing_activity_status(self):
         """ True if the car is not in park, or is actively charging ... """
-        shift = self.old_values['drive_state'].get('shift_state', '')
-        old_speed = self.old_values['drive_state'].get('speed', 0) or 0
-        if shift == "R" or shift == "D" or shift == "N" or old_speed > 0:
+        if self.is_vehicle_driving():
+            logger.debug("Vehicle is Driving")
             return "Driving"
-        if self.old_values['charge_state'].get('charging_state', '') in [
-            "Charging", "Starting"]:
-            return "Charging"
-        # If we just completed the charging, need to wait for voltage to
-        # go down to zero too to avoid stale value in the DB.
-        if (self.old_values['charge_state'].get('charging_state', '') == "Complete" or self.old_values[
-            'charge_state'].get('charging_state', '') == "Stopped") \
-                or self.old_values['charge_state'].get('charger_voltage', 0) > 0 or self.old_values['charge_state'].get('charger_actual_current', 0) > 0:
+
+        if self.is_vehicle_charging():
+            logger.debug("Vehicle is Charging")
             return "Charging"
 
         if self.old_values['climate_state'].get('is_climate_on', False):
             return "Conditioning"
-        # When it's about time to start charging, we want to perform
-        # several polling attempts to ensure we catch it starting even
-        # when scraping is otherwise disabled
-        if self.old_values['charge_state'].get('scheduled_charging_pending', False):
-            scheduled_time = self.old_values['charge_state'].get('scheduled_charging_start_time', 0)
-            if abs(scheduled_time - int(time.time())) <= 2:
-                return "Charging"
 
         # If screen is on, the car is definitely not sleeping so no
         # harm in polling it as long as values are changing
@@ -136,6 +123,40 @@ class StateMonitor(object):
             return "Screen On"
 
         return None
+
+    def is_vehicle_driving(self):
+
+        shift = self.old_values['drive_state'].get('shift_state', '') or ''
+        old_speed = self.old_values['drive_state'].get('speed', 0) or 0
+
+        # For now we'll just use what is in the old status to determine what the current state is
+        if shift == "R" or shift == "D" or shift == "N" or old_speed > 0:
+            return True
+
+        return False
+
+    def is_vehicle_charging(self):
+
+        if self.old_values['charge_state'].get('charging_state', '') in ["Charging", "Starting"]:
+            return True
+
+        # If we just completed the charging, need to wait for voltage to
+        # go down to zero too to avoid stale value in the DB.
+        if (self.old_values['charge_state'].get('charging_state', '') == "Complete" or self.old_values[
+            'charge_state'].get('charging_state', '') == "Stopped") \
+                or self.old_values['charge_state'].get('charger_voltage', 0) > 0 \
+                or self.old_values['charge_state'].get('charger_actual_current', 0) > 0:
+            return True
+
+        # When it's about time to start charging, we want to perform
+        # several polling attempts to ensure we catch it starting even
+        # when scraping is otherwise disabled
+        if self.old_values['charge_state'].get('scheduled_charging_pending', False):
+            scheduled_time = self.old_values['charge_state'].get('scheduled_charging_start_time', 0)
+            if abs(scheduled_time - int(time.time())) <= 2:
+                return True
+
+        return False
 
     def wake_up(self):
         """ mod """
@@ -206,6 +227,14 @@ class StateMonitor(object):
                         "timestamp", "gps_as_of", "left_temp_direction", "right_temp_direction", "charge_port_latch"):
                     old_value = self.old_values[request].get(element, '')
                     new_value = result[element]
+
+                    if new_value is not None:
+                        if element not in a_ignore:
+                            if element in a_validity_checks and eval(a_validity_checks[element]["eval"]):
+                                logger.debug(
+                                    "VALIDITY CHECK VIOLATED >>> " + element + ":" + a_validity_checks[element][
+                                        "eval"])
+                                new_value = a_validity_checks[element]["set"]
                     if element == "vehicle_name" and not new_value:
                         continue
                     if element == "native_latitude":
@@ -269,8 +298,7 @@ class StateMonitor(object):
             if self.request_state_group():
                 any_change = True
             else:
-                shift = self.old_values['drive_state'].get('shift_state', '')
-                if shift == "R" or shift == "D":
+                if self.is_vehicle_driving():
                     # We are actively driving, does not matter we are
                     # stopped at a traffic light or whatnot,
                     # keep polling
@@ -279,6 +307,7 @@ class StateMonitor(object):
 
         except (HTTPError, URLError) as exc:
             logger.info("HTTP Error: " + str(exc))
+
             if a_allow_sleep == 1:
                 return interval
             else:
@@ -465,7 +494,7 @@ while True:
             poll_interval = 0
             asleep_since = 0
 
-        if state_monitor.vehicle['state'] == 'asleep' and is_asleep == 'online':
+        if state_monitor.vehicle['state'] == 'asleep' and (is_asleep == 'online' or asleep_since == 0):
             asleep_since = time.time()
 
         is_asleep = state_monitor.vehicle['state']
@@ -489,8 +518,8 @@ while True:
             influx_client.write_points(state_body)
         logger.debug("Car State: " + is_asleep +
                     " Poll Interval: " + str(poll_interval))
-        if is_asleep == 'asleep' and a_allow_sleep == 1:
-            logger.debug("Car is probably asleep, we let it sleep...")
+        if is_asleep == 'offline' or (is_asleep == 'asleep' and a_allow_sleep == 1):
+            logger.debug("Car is asleep or offline...")
             poll_interval = 64
 
         if poll_interval >= 0:
