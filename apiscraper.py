@@ -41,7 +41,7 @@ a_ignore = ["media_state", "software_update", "speed_limit_mode"]
 a_validity_checks = {
     "charger_voltage":
         {
-            "eval": "new_value < 10",
+            "eval": "new_value < 0",
             "set": 0
         }
 }
