@@ -307,8 +307,10 @@ class StateMonitor(object):
                 if interval > 1:
                     interval /= 2
             else:  # there haven't been any changes, increase interval to allow the car to fall asleep
-                if interval < 2048:
+                if interval < a_maximum_sleep:
                     interval *= 2
+                else:
+                    interval = a_maximum_sleep
         return interval
 
 
