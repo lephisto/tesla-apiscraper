@@ -3357,7 +3357,7 @@
       "thresholds": "",
       "timeFrom": null,
       "timeShift": null,
-      "title": "Last charge finnished",
+      "title": "Last charge finished",
       "type": "singlestat",
       "valueFontSize": "50%",
       "valueMaps": [
