@@ -39,13 +39,14 @@ We updated to Python3 since Python2 is being phased out soon. Python2 is unsuppo
 
 eg:
 ```
-sudo apt install python3 python3-pathlib python3-pip python3-influxdb
+sudo apt install python3 python-pathlib python3-pip python3-influxdb
 ```
 
 - Install InfluxDB as in https://docs.influxdata.com/influxdb/v1.7/introduction/installation/ and create a Database where you want to store your Data in:
 
 ```
-user@horst:~$ influx
+user@horst:~$ sudo service influxdb start
+user@horst:~$ influx -config /etc/influxdb/influxdb.conf
 Connected to http://localhost:8086 version 1.7.2
 InfluxDB shell version: 1.7.2
 Enter an InfluxQL query
@@ -54,18 +55,62 @@ Enter an InfluxQL query
 
 Additionally I suggest you to setup authentication or close the InfluxDB Port with a Packetfileter of your choice, if the Machine you use for Scraping has a Internetfacing Interface.
 
+```
+> CREATE USER tesla WITH PASSWORD '<password>'
+> GRANT ALL ON tesla TO tesla
+```
+
+Enable authentication by setting the auth-enabled option to true in the [http] section of the configuration file:
+
+```
+$ sudo nano /etc/influxdb/influxdb.conf
+    [http]
+        auth-enabled = true
+
+$ sudo service influxdb restart
+
+$ influx -username admin -password <password>
+
+NOTE:
+Maybe the following commands must be used instead of restart
+$ sudo service influxdb stop
+$ sudo influxd -config /etc/influxdb/influxdb.conf
+Ctrl+C
+$ sudo service influxdb start
+```
+
 - Install Grafana as in http://docs.grafana.org/installation/debian/
 
 - Get Grafana grafana-trackmap-panel (and required node package manager)
 
+    - $sudo npm install could fail since some configuration scripts uses Python 2. Fix by temporary change symbolic link
+
+    ```
+    $ cd /usr/bin/
+    $ sudo ln -sfn /usr/bin/python2 python
+    $ cd -
+    ```
+
 ```
-apt install npm
-cd /var/lib/grafana/plugins
-git clone https://github.com/lephisto/grafana-trackmap-panel
-cd grafana-trackmap-panel
-git checkout v2.0.4-teslascraper
-npm install
-npm run build
+$ sudo apt install npm
+Ensure that the latest version is used
+$ sudo npm install -g npm@latest
+Create plugin directory if it does not exist
+$ cd /var/lib/grafana
+$ sudo mkdir plugins
+$ sudo chown -R pi:pi plugins/
+Clone plugin and fetch stable version
+$ cd /var/lib/grafana/plugins
+$ git clone https://github.com/lephisto/grafana-trackmap-panel
+$ cd grafana-trackmap-panel
+$ git checkout v2.0.4
+Update dependency packages in /var/lib/grafana/plugins/grafana-trackmap-panel/package.json
+$ sudo npm i npm-update-all -g
+$ sudo npm-update-all
+$ sudo npm update caniuse-lite browserslist
+Install plugin
+$ sudo npm install
+$ sudo npm run build
 ```
 
 - Get Grafana natel-discrete-panel
@@ -80,6 +125,37 @@ systemctl restart grafana-server.service
 ```
 
 - Import the Dashboard JSON Files included in this repository.
+
+Log in to Grafana:
+    http://localhost:3000/
+    Default login: admin. Password: admin
+    Change the default password
+
+Before the JSON files can be imported, the PluginName (InfluxDB) listed in the .json file must be added to Grafana as a Data Source
+
+```
+Settings->Data Sources->Add data source
+
+Update the following fields:
+
+[HTTP]
+URL = http://localhost:8086
+
+[InfluxDB Details]
+Database = tesla
+User = tesla
+Password = xx
+```
+
+![Grafana Configuration 1](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/grafana_install_01_add_data_source.png)
+
+![Grafana Configuration 2](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/grafana_install_02_add_data_source.png)
+
+Import all JSON files from the subfolder 'grafana-dashboards' in Tesla API Scraper project
+```
++ ->Import->Upload .json File
+```
+![Grafana Configuration 3](https://raw.githubusercontent.com/lephisto/tesla-apiscraper/master/screenshots/grafana_install_03_import_json_files.png)
 
 **Note to the US-Users**: Since the API reports all Range Values in Miles, i included two dashboard variables to match your preferences. By default the Conversion to km / kph is done, to get rid of this go to the dashboard settings:
 
