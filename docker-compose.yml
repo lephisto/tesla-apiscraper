@@ -4,6 +4,7 @@ version: '2'
 services:
 
   influxdb:
+    restart: unless-stopped
     image: "influxdb:latest"
     container_name: "influxdb_apiscraper"
     environment:
@@ -12,6 +13,7 @@ services:
       - /opt/apiscraper/influxdb:/var/lib/influxdb
 
   grafana:
+    restart: unless-stopped
     image: grafana/grafana:latest
     container_name: "grafana_apiscraper"
     environment:
@@ -28,6 +30,7 @@ services:
       - ./provisioning/:/etc/grafana/provisioning
 
   apiscraper:
+    restart: unless-stopped
     container_name: apiscraper
     build:
       args:
@@ -38,7 +41,6 @@ services:
        - ./config.py:/tesla-apiscraper/config.py
        - ./apiscraper.log:/tesla-apiscraper/apiscraper.log
     ports:
-      - "8023:8023"
-    restart: on-failure:5
+      - "8023"
     depends_on:
       - influxdb
